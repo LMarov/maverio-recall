@@ -37,6 +37,10 @@
       "dist/**",
       "electron/**"
     ],
+    "protocols": {
+      "name": "Maverio Recall invite/reset link",
+      "schemes": ["maveriorecall"]
+    },
     "mac": {
       "category": "public.app-category.productivity",
       "target": "dmg",

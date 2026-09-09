@@ -18,5 +18,10 @@ contextBridge.exposeInMainWorld('recallAPI', {
   requestMic: () => ipcRenderer.invoke('capture:request-mic'),
   saveRecording: (buffer, meetingId) => ipcRenderer.invoke('recording:save', buffer, meetingId),
   transcribe: (filePath) => ipcRenderer.invoke('recording:transcribe', filePath),
-  analyze: (fullText, lines, context) => ipcRenderer.invoke('recording:analyze', fullText, lines, context)
+  analyze: (fullText, lines, context) => ipcRenderer.invoke('recording:analyze', fullText, lines, context),
+  onDeepLink: (callback) => {
+    const listener = (_e, link) => callback(link);
+    ipcRenderer.on('deep-link', listener);
+    return () => ipcRenderer.removeListener('deep-link', listener);
+  }
 });

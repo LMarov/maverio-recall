@@ -78,8 +78,9 @@ teamRouter.post(
         subject: `${req.user!.name} invited you to Maverio Recall`,
         text:
           `${req.user!.name} has invited you to join the Maverio Recall workspace.\n\n` +
-          `Open the app, choose "Join the workspace", and enter this invite code:\n\n` +
-          `${token}\n\n` +
+          `Click to open the app and join (or open the app yourself, choose "Join the workspace", and enter the code below):\n\n` +
+          `maveriorecall://join/${token}\n\n` +
+          `Invite code: ${token}\n\n` +
           `(${env.appUrl})`
       })
       .catch((err) => console.error('Failed to send invite email:', err));

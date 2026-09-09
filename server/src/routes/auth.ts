@@ -105,8 +105,10 @@ authRouter.post(
           subject: 'Reset your Maverio Recall password',
           text:
             `Hi ${user.name},\n\n` +
-            'Use this code to set a new password. It expires in 1 hour and can only be used once:\n\n' +
-            `${token}\n\n` +
+            'Click to open the app and set a new password (or open it yourself and enter the code below). ' +
+            "It expires in 1 hour and can only be used once:\n\n" +
+            `maveriorecall://reset/${token}\n\n` +
+            `Reset code: ${token}\n\n` +
             "If you didn't ask for this, ignore this email — your password hasn't changed."
         })
         .catch((err) => console.error('Failed to send password reset email:', err));

@@ -192,6 +192,19 @@ export function useApp() {
     };
   }, []);
 
+  // A maveriorecall://join/<code> or maveriorecall://reset/<code> link clicked
+  // in an invite/reset email — prefills the code so nobody has to copy/paste
+  // it by hand. No-op outside Electron (e.g. a plain browser dev session).
+  useEffect(() => {
+    return window.recallAPI?.onDeepLink((link) => {
+      if (link.kind === 'join') {
+        patch({ authView: 'accept-invite', authInviteToken: link.token, authError: null, authInfo: null });
+      } else if (link.kind === 'reset') {
+        patch({ authView: 'reset-password', authResetToken: link.token, authError: null, authInfo: null });
+      }
+    });
+  }, []);
+
   const go = (screen: AppState['screen']) => patch((s) => ({ screen, query: screen === 'search' ? s.query : '' }));
 
   // The audit log is owner/admin-only and small enough to just refetch on every

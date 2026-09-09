@@ -23,6 +23,7 @@ declare global {
         gaps: { q: string; why: string; cite: string }[];
         fields: Record<string, string>;
       }>;
+      onDeepLink: (callback: (link: { kind: 'join' | 'reset'; token: string }) => void) => () => void;
     };
   }
 }

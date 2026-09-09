@@ -12,7 +12,10 @@ into and shares.
   (`src/routes/auth.ts`, `src/routes/team.ts`, `src/util/rateLimit.ts`).
 - **Email** — invite and password-reset emails go through a small adapter
   (`src/email/`) that defaults to logging to the console (no account
-  needed) and can send for real over SMTP with any provider.
+  needed) and can send for real over SMTP with any provider. Both emails
+  include a clickable `maveriorecall://join/<code>` or
+  `maveriorecall://reset/<code>` deep link that opens the desktop app with
+  the code pre-filled, alongside the raw code as a fallback.
 - **Data** — clients, meetings (with decisions/actions/gaps/fields/
   transcript lines), scheduled meetings, voice names, voiceprints, an audit
   log — all in Postgres (`src/db/migrations/`).
@@ -196,6 +199,10 @@ have been.
 - Invite emails still hand back the raw join token in the API response too
   (Team & seats shows it after sending one) as a fallback for when
   `EMAIL_DRIVER=console` or delivery fails — by design, not a gap.
+- The `maveriorecall://` deep links in invite/reset emails have had their
+  link-parsing logic and packaged-app protocol registration verified
+  directly, but not an actual click-to-launch on a real Mac (needs a
+  signed, installed build — see `../app/README.md`).
 - `rateLimit.ts`'s in-memory counters are per-process — fine for a single
   server instance (this app's whole deployment model today), but would need
   a shared store (e.g. Redis) if this ever ran as multiple instances behind

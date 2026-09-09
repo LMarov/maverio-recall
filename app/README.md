@@ -87,7 +87,7 @@ these environment variables are set before `npm run dist`:
 Leave all of these unset for a local unsigned build — `npm run dist` still
 works, it just isn't distributable to other machines.
 
-## What's real vs. still mocked (Phase 5)
+## What's real vs. still mocked (Phase 7)
 
 **Real, shared across the team via the server:**
 - Sign-in (email + password), invite-a-colleague, forgot/reset password,
@@ -132,12 +132,22 @@ works, it just isn't distributable to other machines.
   for the setup and honest limits of this (it needs a real Picovoice
   AccessKey to do anything, which this sandbox doesn't have).
 
+- **Invite and password-reset emails are clickable deep links.** Clicking
+  `maveriorecall://join/<code>` or `maveriorecall://reset/<code>` (see
+  `electron/main.cjs`) launches the app straight into the accept-invite or
+  reset-password screen with the code already filled in — the raw code is
+  still included underneath as a fallback for anyone whose mail client
+  strips the link or who's copying it to a different machine. A real
+  `recall.maverio.com/join/...` web link would need an actual hosted domain;
+  this achieves the same one-click outcome without one, since macOS hands a
+  registered custom URL scheme straight to the app. The link-parsing logic
+  and the packaged app's `Info.plist` registration were both verified
+  directly; actually clicking a `maveriorecall://` link and watching macOS
+  launch/focus the app hasn't been, since that needs a real signed,
+  installed build on an actual Mac — not available in this sandbox.
+
 **Still mocked / not yet built:**
 - Simultaneous screen recording (removed from the UI as not implemented)
-- Invite links are still a raw code, now emailed (or logged to the server
-  console in dev) rather than only shown in the app — but there's no
-  `recall.maverio.com/join/...` deep link that pre-fills it yet, so the
-  invitee still copies/pastes the code by hand
 - Ask search has no real ranking/retrieval — it hands the server's 50 most
   recent meetings' summaries to Claude (or one full meeting when scoped).
   Fine for a team's real-world volume today; will need actual retrieval
@@ -151,10 +161,13 @@ works, it just isn't distributable to other machines.
 - `build/entitlements.mac.plist` — hardened-runtime entitlements for
   signing/notarization, see "Signing & notarization" above.
 - `electron/main.cjs` — window + local IPC handlers (screen-source picker,
-  mic permission, saving a recording to a temp file). The old local
-  store/transcribe/analyze IPC handlers (`electron/store.cjs`,
-  `electron/ai.cjs`) are unused now that the server does all of that, and
-  are kept only as a reference for the Phase 1 local-only pipeline.
+  mic permission, saving a recording to a temp file), plus the
+  `maveriorecall://` custom-protocol registration and deep-link parsing
+  (forwarded to the renderer over the `deep-link` IPC channel, see
+  `electron/preload.cjs`'s `onDeepLink`). The old local store/transcribe/
+  analyze IPC handlers (`electron/store.cjs`, `electron/ai.cjs`) are unused
+  now that the server does all of that, and are kept only as a reference
+  for the Phase 1 local-only pipeline.
 - `src/api.ts` — REST client for the server (`../server`): auth, team,
   clients, meetings, scheduled meetings, audio upload, ask. The only place a
   network request is made.
