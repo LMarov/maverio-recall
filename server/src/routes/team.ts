@@ -7,8 +7,12 @@ import { pool } from '../db/pool';
 import { audit } from '../util/audit';
 import { asyncHandler } from '../util/asyncHandler';
 import { broadcast } from '../realtime/hub';
+import { email as emailAdapter } from '../email';
+import { rateLimit } from '../util/rateLimit';
 
 export const teamRouter = Router();
+
+const inviteLimit = rateLimit({ windowMs: 60 * 60 * 1000, max: 20, keyPrefix: 'team-invite' });
 
 teamRouter.get(
   '/',
@@ -34,6 +38,7 @@ const inviteSchema = z.object({
 teamRouter.post(
   '/invite',
   requireAuth,
+  inviteLimit,
   asyncHandler(async (req, res) => {
     if (req.user!.role !== 'Owner' && req.user!.role !== 'Admin') {
       res.status(403).json({ error: 'Only the owner and admins can invite. Ask an owner to add a seat.' });
@@ -66,7 +71,21 @@ teamRouter.post(
     ]);
     await audit(req.user!.id, 'invite', 'user', email);
     broadcast({ type: 'team.invited', email });
-    // No email provider wired up yet — hand back the join link for the inviter to share directly.
+
+    emailAdapter
+      .send({
+        to: email,
+        subject: `${req.user!.name} invited you to Maverio Recall`,
+        text:
+          `${req.user!.name} has invited you to join the Maverio Recall workspace.\n\n` +
+          `Open the app, choose "Join the workspace", and enter this invite code:\n\n` +
+          `${token}\n\n` +
+          `(${env.appUrl})`
+      })
+      .catch((err) => console.error('Failed to send invite email:', err));
+
+    // Also hand back the token directly — useful in dev (console email driver)
+    // and as a fallback the inviter can relay manually if delivery fails.
     res.json({ email, joinToken: token });
   })
 );

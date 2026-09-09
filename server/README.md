@@ -8,7 +8,11 @@ into and shares.
 ## What it does
 
 - **Auth** — email + password, JWT sessions, invite-only signup gated to
-  `@maverio.com` (`src/routes/auth.ts`, `src/routes/team.ts`).
+  `@maverio.com`, password reset, rate-limited login/invite/reset endpoints
+  (`src/routes/auth.ts`, `src/routes/team.ts`, `src/util/rateLimit.ts`).
+- **Email** — invite and password-reset emails go through a small adapter
+  (`src/email/`) that defaults to logging to the console (no account
+  needed) and can send for real over SMTP with any provider.
 - **Data** — clients, meetings (with decisions/actions/gaps/fields/
   transcript lines), scheduled meetings, voice names, an audit log — all in
   Postgres (`src/db/migrations/0001_init.sql`).
@@ -55,6 +59,17 @@ running the migration.
 | `DEEPGRAM_API_KEY` | Transcription + speaker diarization — https://console.deepgram.com |
 | `ANTHROPIC_API_KEY` | Meeting analysis — https://console.anthropic.com |
 | `PORT` | Defaults to `8787` |
+| `EMAIL_DRIVER` | `console` (default, dev-only — logs the email instead of sending it) or `smtp` |
+| `EMAIL_FROM` | The "from" address on sent emails |
+| `SMTP_HOST` / `SMTP_PORT` / `SMTP_SECURE` / `SMTP_USER` / `SMTP_PASS` | Only used when `EMAIL_DRIVER=smtp` — works with any SMTP provider (Gmail, SES, Postmark, Mailgun, your own mail server, ...); no specific vendor required |
+| `APP_URL` | Included in emailed links — the app's own URL (default `http://localhost:5173`) |
+
+Invite and password-reset emails go through this same adapter
+(`src/email/`). Leave `EMAIL_DRIVER=console` for local dev — the email
+content (including the invite/reset code) is printed to the server's
+console instead of sent, so nothing beyond running the server locally is
+needed to test either flow. Set `EMAIL_DRIVER=smtp` with real SMTP
+credentials to actually deliver mail.
 
 `STORAGE_DRIVER=local` is meant for local development only — it writes
 recordings to disk under `LOCAL_STORAGE_DIR` and serves them back over
@@ -87,15 +102,21 @@ npm run build && npm run dev:electron
   `process.ts` (orchestrates the two after an upload and broadcasts the
   result), `ask.ts` (answers a question grounded in the team's meetings).
 - `src/realtime/hub.ts` — the websocket connection registry + `broadcast()`.
-- `src/util/` — small shared helpers (async route wrapper, audit log writer).
+- `src/email/` — the email abstraction (`console.ts` / `smtp.ts`) behind a
+  single `EmailAdapter` interface, same pattern as `src/storage/`.
+- `src/util/` — small shared helpers (async route wrapper, audit log writer,
+  `rateLimit.ts` — an in-memory fixed-window limiter on the auth/invite
+  endpoints).
 
 ## What's not built yet
 
-- No email delivery for invites — `POST /team/invite` hands back a raw join
-  token the inviter has to relay themselves (Team & seats shows it after
-  sending one). Wiring a real mailer (Postmark/SES) is the natural next step.
-- No password reset flow.
-- No rate limiting / abuse protection on the auth endpoints.
+- Invite emails still hand back the raw join token in the API response too
+  (Team & seats shows it after sending one) as a fallback for when
+  `EMAIL_DRIVER=console` or delivery fails — by design, not a gap.
+- `rateLimit.ts`'s in-memory counters are per-process — fine for a single
+  server instance (this app's whole deployment model today), but would need
+  a shared store (e.g. Redis) if this ever ran as multiple instances behind
+  a load balancer.
 - The retention policy mentioned in the Knowledge base UI copy (30-day audio
   retention) isn't enforced by a cron job yet — the audit log table exists
   but nothing reads it back into a UI.

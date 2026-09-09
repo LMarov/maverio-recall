@@ -24,5 +24,18 @@ export const env = {
   },
 
   deepgramApiKey: process.env.DEEPGRAM_API_KEY || '',
-  anthropicApiKey: process.env.ANTHROPIC_API_KEY || ''
+  anthropicApiKey: process.env.ANTHROPIC_API_KEY || '',
+
+  emailDriver: (process.env.EMAIL_DRIVER || 'console') as 'console' | 'smtp',
+  emailFrom: process.env.EMAIL_FROM || 'Maverio Recall <no-reply@maverio.com>',
+  smtp: {
+    host: process.env.SMTP_HOST,
+    port: Number(process.env.SMTP_PORT || 587),
+    secure: (process.env.SMTP_SECURE || 'false') === 'true',
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS
+  },
+
+  /** Base URL a human clicks to reach the app — used in emailed links. */
+  appUrl: process.env.APP_URL || 'http://localhost:5173'
 };

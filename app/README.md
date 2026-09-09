@@ -62,11 +62,13 @@ npm run build   # type-check + Vite production build -> dist/
 npm run dist    # build + package a macOS app with electron-builder
 ```
 
-## What's real vs. still mocked (Phase 3)
+## What's real vs. still mocked (Phase 4)
 
 **Real, shared across the team via the server:**
-- Sign-in (email + password), invite-a-colleague, domain-gated to
-  `@maverio.com` — `src/components/screens/Auth.tsx`, `src/api.ts`
+- Sign-in (email + password), invite-a-colleague, forgot/reset password,
+  domain-gated to `@maverio.com` — `src/components/screens/Auth.tsx`,
+  `src/api.ts`. Invite and reset emails are sent for real once the server
+  has `EMAIL_DRIVER=smtp` configured (see `../server/README.md`).
 - Clients (create/edit/archive/notes/contacts), scheduled meetings, meeting
   publish/unpublish, gap answers, field edits, title edits, voice names —
   all persisted in the server's Postgres database and live-synced to every
@@ -82,6 +84,10 @@ npm run dist    # build + package a macOS app with electron-builder
   source meeting. No more canned answer bank once signed in.
 - A brand-new team's workspace starts genuinely empty (no seed meetings) —
   the Timeline/Knowledge base/Ask rail all handle the zero-data state gracefully
+- A pending invite (no name yet — the invitee hasn't accepted) renders with
+  a readable placeholder name derived from their email (`nameFromEmail` in
+  `src/derive.ts`) everywhere a team member's name is shown, instead of
+  assuming every team member already has one
 
 **Still mocked / not yet built:**
 - **No cross-meeting voice recognition.** Deepgram diarizes speakers within
@@ -96,8 +102,10 @@ npm run dist    # build + package a macOS app with electron-builder
 - Attendee/team-member "voiceprint" identity is still the fixed 8-person
   mock roster (`P` in `src/data.ts`) for the Prep screen's attendee chips;
   a real team's invited members don't get a matching avatar/color slot there
-- Invite links are a raw code the inviter copies and sends manually (no
-  email delivery, no `recall.maverio.com/join/...` deep link yet)
+- Invite links are still a raw code, now emailed (or logged to the server
+  console in dev) rather than only shown in the app — but there's no
+  `recall.maverio.com/join/...` deep link that pre-fills it yet, so the
+  invitee still copies/pastes the code by hand
 - Ask search has no real ranking/retrieval — it hands the server's 50 most
   recent meetings' summaries to Claude (or one full meeting when scoped).
   Fine for a team's real-world volume today; will need actual retrieval

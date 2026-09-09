@@ -38,9 +38,19 @@ export interface Methods {
   login: (email: string, password: string) => void;
   acceptInvite: (token: string, name: string, password: string) => void;
   logout: () => void;
+  forgotPassword: (email: string) => void;
+  resetPassword: (token: string, password: string) => void;
 }
 
 const asPerson = (k: string) => P[k as PersonKey];
+
+/** A pending invite has no name yet (the invitee hasn't set one) — derive a readable placeholder from their email. */
+const nameFromEmail = (email: string) =>
+  email
+    .split('@')[0]
+    .split(/[._-]/)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
 
 function publishState(s: AppState, m: Meeting) {
   const override = s.publishOverrides[m.id];
@@ -59,8 +69,27 @@ function formatWhen(dateStr: string, timeStr: string): string {
 }
 
 export function buildView(s: AppState, methods: Methods) {
-  const { patch, go, open, ask, speaker, md, pushToClient, toggleRecord, openNamerFor, scheduleMeeting, loadScheduled, removeScheduled, publishMeeting, unpublishMeeting, login, acceptInvite, logout } =
-    methods;
+  const {
+    patch,
+    go,
+    open,
+    ask,
+    speaker,
+    md,
+    pushToClient,
+    toggleRecord,
+    openNamerFor,
+    scheduleMeeting,
+    loadScheduled,
+    removeScheduled,
+    publishMeeting,
+    unpublishMeeting,
+    login,
+    acceptInvite,
+    logout,
+    forgotPassword,
+    resetPassword
+  } = methods;
   const dark = s.theme === 'dark';
   const ALL: Meeting[] = [...s.newMeetings, ...s.meetings];
   const EMPTY_MEETING: Meeting = {
@@ -237,7 +266,7 @@ export function buildView(s: AppState, methods: Methods) {
   const collapsed = s.w < 880;
   const railOpen = narrow ? s.railOpen : true;
   const meRow = s.team.find((t) => t.email === s.me) || s.team[0];
-  const meName = meRow.k ? asPerson(meRow.k).n : meRow.name!;
+  const meName = meRow.k ? asPerson(meRow.k).n : meRow.name || nameFromEmail(meRow.email);
   const isOwner = meRow.role === 'Owner';
   const isAdmin = isOwner || meRow.role === 'Admin';
 
@@ -255,8 +284,10 @@ export function buildView(s: AppState, methods: Methods) {
   return {
     authed: !!s.authUser,
     authView: s.authView,
-    goLogin: () => patch({ authView: 'login', authError: null }),
-    goAcceptInvite: () => patch({ authView: 'accept-invite', authError: null }),
+    goLogin: () => patch({ authView: 'login', authError: null, authInfo: null }),
+    goAcceptInvite: () => patch({ authView: 'accept-invite', authError: null, authInfo: null }),
+    goForgotPassword: () => patch({ authView: 'forgot-password', authError: null, authInfo: null }),
+    goResetPassword: () => patch({ authView: 'reset-password', authError: null, authInfo: null }),
     authEmail: s.authEmail,
     onAuthEmail: (v: string) => patch({ authEmail: v }),
     authPassword: s.authPassword,
@@ -265,12 +296,19 @@ export function buildView(s: AppState, methods: Methods) {
     onAuthName: (v: string) => patch({ authName: v }),
     authInviteToken: s.authInviteToken,
     onAuthInviteToken: (v: string) => patch({ authInviteToken: v }),
+    authResetToken: s.authResetToken,
+    onAuthResetToken: (v: string) => patch({ authResetToken: v }),
     authError: s.authError,
+    authInfo: s.authInfo,
     authLoading: s.authLoading,
     authLoginReady: !!(s.authEmail.trim() && s.authPassword),
     authAcceptReady: !!(s.authInviteToken.trim() && s.authName.trim() && s.authPassword.length >= 8),
+    authForgotReady: !!s.authEmail.trim(),
+    authResetReady: !!(s.authResetToken.trim() && s.authPassword.length >= 8),
     submitLogin: () => login(s.authEmail.trim(), s.authPassword),
     submitAcceptInvite: () => acceptInvite(s.authInviteToken.trim(), s.authName.trim(), s.authPassword),
+    submitForgotPassword: () => forgotPassword(s.authEmail.trim()),
+    submitResetPassword: () => resetPassword(s.authResetToken.trim(), s.authPassword),
     logout,
 
     meName,
@@ -297,7 +335,7 @@ export function buildView(s: AppState, methods: Methods) {
     accountList: s.team
       .filter((t) => t.status === 'active')
       .map((t) => {
-        const nm = t.k ? asPerson(t.k).n : t.name!;
+        const nm = t.k ? asPerson(t.k).n : t.name || nameFromEmail(t.email);
         return {
           name: nm,
           ini: ini(nm),
@@ -1109,11 +1147,7 @@ export function buildView(s: AppState, methods: Methods) {
     onInvite: () => {
       const em = s.inviteEmail.trim();
       if (!isAdmin || !/@maverio\.com$/i.test(em)) return;
-      const nm = em
-        .split('@')[0]
-        .split(/[._-]/)
-        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-        .join(' ');
+      const nm = nameFromEmail(em);
       patch((p) => ({
         team: [...p.team, { name: nm, email: em, role: p.inviteRole, status: 'pending', seen: 'invited just now', vp: 'awaiting first call', scope: p.inviteScope }],
         inviteEmail: '',
@@ -1129,7 +1163,7 @@ export function buildView(s: AppState, methods: Methods) {
     },
     lastInviteToken: s.lastInviteToken,
     team: s.team.map((t) => {
-      const nm = t.k ? asPerson(t.k).n : t.name!;
+      const nm = t.k ? asPerson(t.k).n : t.name || nameFromEmail(t.email);
       const pend = t.status === 'pending';
       const owner = t.role === 'Owner';
       return {

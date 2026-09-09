@@ -48,7 +48,9 @@ export const authApi = {
   login: (email: string, password: string) => post<{ token: string; user: AuthUser }>('/auth/login', { email, password }),
   acceptInvite: (token: string, name: string, password: string) =>
     post<{ token: string; user: AuthUser }>('/auth/accept-invite', { token, name, password }),
-  me: () => get<{ user: AuthUser }>('/auth/me')
+  me: () => get<{ user: AuthUser }>('/auth/me'),
+  forgotPassword: (email: string) => post<{ ok: true }>('/auth/forgot-password', { email }),
+  resetPassword: (token: string, password: string) => post<{ ok: true }>('/auth/reset-password', { token, password })
 };
 
 // ---- team ----

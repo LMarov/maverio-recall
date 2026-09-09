@@ -156,7 +156,27 @@ export function useApp() {
 
   const logout = () => {
     disconnectRealtime();
-    patch({ authToken: null, authUser: null, authEmail: '', authPassword: '', authName: '', authInviteToken: '' });
+    patch({ authToken: null, authUser: null, authEmail: '', authPassword: '', authName: '', authInviteToken: '', authResetToken: '' });
+  };
+
+  const forgotPassword = async (forgotEmail: string) => {
+    patch({ authLoading: true, authError: null, authInfo: null });
+    try {
+      await authApi.forgotPassword(forgotEmail);
+      patch({ authLoading: false, authInfo: 'If that email has an account, a reset code is on its way.', authView: 'reset-password' });
+    } catch (e) {
+      patch({ authLoading: false, authError: e instanceof Error ? e.message : String(e) });
+    }
+  };
+
+  const resetPassword = async (token: string, password: string) => {
+    patch({ authLoading: true, authError: null, authInfo: null });
+    try {
+      await authApi.resetPassword(token, password);
+      patch({ authLoading: false, authInfo: 'Password updated — sign in with your new password.', authView: 'login', authPassword: '', authResetToken: '' });
+    } catch (e) {
+      patch({ authLoading: false, authError: e instanceof Error ? e.message : String(e) });
+    }
   };
 
   // componentDidMount: recording clock + window resize listener
@@ -651,7 +671,9 @@ export function useApp() {
     unpublishMeeting,
     login,
     acceptInvite,
-    logout
+    logout,
+    forgotPassword,
+    resetPassword
   };
 
   const view = buildView(state, methods);

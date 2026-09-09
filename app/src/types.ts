@@ -58,7 +58,7 @@ export type ScreenKey =
 export type ClientMode = 'list' | 'new' | 'edit' | 'detail';
 export type Tab = 'summary' | 'transcript' | 'export';
 
-export type AuthView = 'login' | 'accept-invite';
+export type AuthView = 'login' | 'accept-invite' | 'forgot-password' | 'reset-password';
 
 export interface AppState {
   authToken: string | null;
@@ -68,7 +68,9 @@ export interface AppState {
   authPassword: string;
   authName: string;
   authInviteToken: string;
+  authResetToken: string;
   authError: string | null;
+  authInfo: string | null;
   authLoading: boolean;
   lastInviteToken: string | null;
   /** Maps the client-name keys the rest of the app uses back to backend ids, for network calls. */
