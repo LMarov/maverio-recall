@@ -62,7 +62,7 @@ npm run build   # type-check + Vite production build -> dist/
 npm run dist    # build + package a macOS app with electron-builder
 ```
 
-## What's real vs. still mocked (Phase 4)
+## What's real vs. still mocked (Phase 5)
 
 **Real, shared across the team via the server:**
 - Sign-in (email + password), invite-a-colleague, forgot/reset password,
@@ -86,22 +86,29 @@ npm run dist    # build + package a macOS app with electron-builder
   the Timeline/Knowledge base/Ask rail all handle the zero-data state gracefully
 - A pending invite (no name yet — the invitee hasn't accepted) renders with
   a readable placeholder name derived from their email (`nameFromEmail` in
-  `src/derive.ts`) everywhere a team member's name is shown, instead of
+  `src/data.ts`) everywhere a team member's name is shown, instead of
   assuming every team member already has one
+- **Prep's "Voices in the room" attendee chips** are the real team roster and
+  the current client's real contacts (`attendeeFromTeamMember`/
+  `attendeeFromContact` in `src/data.ts`), each with a stable, deterministic
+  avatar color (`colorForKey`) — not the fixed 8-person mock dictionary
+- **The audit log** (Capture & policy screen, owners/admins only) reads real
+  sign-ins, invites, client edits, publishes, and audio-retention deletions
+  from the server's `/audit` endpoint
+- **Cross-meeting voice recognition** — when the server has a
+  `PICOVOICE_ACCESS_KEY` configured, naming a speaker enrolls a real
+  voiceprint (Picovoice Eagle, on-device speaker embeddings — no raw audio
+  stored, just the derived profile), and every new meeting's still-unnamed
+  speakers are checked against it. A match only ever surfaces as a
+  suggestion — a prefilled name + confidence % on the Voices screen's
+  pending-voice card and in the namer — a human still has to confirm it.
+  Entirely optional: with no key set, naming a speaker works exactly as
+  before, just without any cross-meeting matching. See `../server/README.md`
+  for the setup and honest limits of this (it needs a real Picovoice
+  AccessKey to do anything, which this sandbox doesn't have).
 
 **Still mocked / not yet built:**
-- **No cross-meeting voice recognition.** Deepgram diarizes speakers within
-  one recording; naming a speaker only applies to that one meeting (unlike
-  the demo's "?1 recurs across 4 Hartline calls" voiceprint fiction). Every
-  unnamed speaker Deepgram/Claude produce — transcript line keys and each
-  action's "who" — is normalized to the same meeting-scoped key
-  (`src/sync.ts`'s `scopeSpeakerKey`) so they render consistently and never
-  collide with an unrelated meeting's "Speaker 0", but the identities
-  themselves still don't carry across recordings.
 - Simultaneous screen recording (removed from the UI as not implemented)
-- Attendee/team-member "voiceprint" identity is still the fixed 8-person
-  mock roster (`P` in `src/data.ts`) for the Prep screen's attendee chips;
-  a real team's invited members don't get a matching avatar/color slot there
 - Invite links are still a raw code, now emailed (or logged to the server
   console in dev) rather than only shown in the app — but there's no
   `recall.maverio.com/join/...` deep link that pre-fills it yet, so the
@@ -110,6 +117,9 @@ npm run dist    # build + package a macOS app with electron-builder
   recent meetings' summaries to Claude (or one full meeting when scoped).
   Fine for a team's real-world volume today; will need actual retrieval
   (full-text or vector search) once a team has hundreds of meetings.
+- Voiceprint enrollment rebuilds a person's profile from whichever meeting's
+  audio they were most recently (re)named in — it doesn't average across
+  every meeting they've ever been confirmed in.
 
 ## Structure
 
@@ -136,8 +146,12 @@ npm run dist    # build + package a macOS app with electron-builder
   launch before the network fetch + websocket reconcile it with the server.
 - `src/data.ts` — the original mock data model (people, seed meetings, the
   canned Q&A answer bank, practices) — still used as an offline-safe default
-  before login, and for cosmetic constants (practice colors, the fixed
-  attendee roster) that Phase 2 didn't need to change.
+  before login, and for cosmetic constants (practice colors, audit action
+  labels) that didn't need to change. Also home to the real-attendee
+  resolvers (`attendeeFromTeamMember`, `attendeeFromContact`,
+  `resolveAttendeeKey`, `colorForKey`) that unify the fixed demo roster with
+  real team members and client contacts wherever a speaker/attendee needs a
+  name and color.
 - `src/initialState.ts` — the app's initial state shape.
 - `src/useApp.ts` — state + the imperative logic: auth (login/accept-invite/
   logout), the real recording lifecycle (capture → upload → the server

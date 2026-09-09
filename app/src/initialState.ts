@@ -110,6 +110,9 @@ export function createInitialState(): AppState {
     copied: false,
 
     settings: { disclosure: true, autoCal: true, keepAudio: false, sysAudio: true, mic: true },
+    auditLog: [],
+    auditLoading: false,
+    auditError: null,
 
     w: typeof window !== 'undefined' ? window.innerWidth : 1400,
     railOpen: false,

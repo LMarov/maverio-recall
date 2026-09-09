@@ -1,4 +1,4 @@
-import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { env } from '../env';
 import type { StorageAdapter } from './index';
@@ -31,5 +31,9 @@ export class S3Storage implements StorageAdapter {
     const res = await this.client.send(new GetObjectCommand({ Bucket: env.s3.bucket, Key: key }));
     const bytes = await res.Body!.transformToByteArray();
     return Buffer.from(bytes);
+  }
+
+  async delete(key: string): Promise<void> {
+    await this.client.send(new DeleteObjectCommand({ Bucket: env.s3.bucket, Key: key }));
   }
 }

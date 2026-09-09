@@ -5,6 +5,10 @@ import { pool } from '../db/pool';
 import { audit } from '../util/audit';
 import { asyncHandler } from '../util/asyncHandler';
 import { broadcast } from '../realtime/hub';
+import { storage } from '../storage';
+import { decodeToPcm16k } from '../pipeline/audioDecode';
+import { enrollSpeaker, isVoiceprintEnabled, sliceSpeakerPcm } from '../pipeline/voiceprint';
+import type { RawUtterance } from '../pipeline/transcribe';
 
 export const meetingsRouter = Router();
 meetingsRouter.use(requireAuth);
@@ -37,6 +41,8 @@ function serializeMeeting(row: any, gapAnswers: any[], fieldEdits: any[]) {
     gaps,
     fields,
     lines: row.lines || [],
+    /** rawSpeakerIndex -> voiceprint match suggestion; keyed the same raw way as `people`/`lines[].k`, scoped client-side. */
+    speakerSuggestions: row.speaker_suggestions || {},
     published: row.published,
     publishedBy: row.published_by,
     publishedAt: row.published_at,
@@ -154,6 +160,29 @@ meetingsRouter.get(
   })
 );
 
+/** meeting-scoped speaker keys look like "?<meetingId>:<rawSpeakerIndex>" (see the app's sync.ts scopeSpeakerKey). */
+function parseSpeakerKey(key: string): { meetingId: string; rawIndex: string } | null {
+  const m = /^\?([0-9a-f-]{36}):(\d+)$/i.exec(key);
+  return m ? { meetingId: m[1], rawIndex: m[2] } : null;
+}
+
+/** Best-effort: builds/replaces this person's voiceprint from their audio in the meeting that was just named. Never blocks or fails the naming request. */
+async function enrollFromNaming(meetingId: string, rawIndex: string, label: string) {
+  if (!isVoiceprintEnabled()) return;
+  try {
+    const { rows } = await pool.query('select audio_storage_key, raw_utterances from meetings where id = $1', [meetingId]);
+    const row = rows[0];
+    if (!row?.audio_storage_key) return; // audio already past retention, or pipeline never stored it
+    const buffer = await storage.get(row.audio_storage_key);
+    const pcm = await decodeToPcm16k(buffer);
+    const utterances = (row.raw_utterances || []) as RawUtterance[];
+    const speakerPcm = sliceSpeakerPcm(pcm, utterances, rawIndex);
+    await enrollSpeaker(label, speakerPcm);
+  } catch (err) {
+    console.error('[voiceprint] enrollment failed', err);
+  }
+}
+
 meetingsRouter.put(
   '/meta/voice-names/:key',
   asyncHandler(async (req, res) => {
@@ -165,5 +194,8 @@ meetingsRouter.put(
     );
     broadcast({ type: 'meeting.updated', meetingId: 'voice-name:' + req.params.key });
     res.json({ ok: true });
+
+    const parsed = parseSpeakerKey(req.params.key);
+    if (parsed) void enrollFromNaming(parsed.meetingId, parsed.rawIndex, name);
   })
 );

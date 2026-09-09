@@ -123,6 +123,7 @@ export interface MeetingRow {
   gaps: { q: string; why: string; cite: string; answer?: string }[];
   fields: { key: string; val: string; edited?: boolean }[];
   lines: { t: string; k: string; text: string }[];
+  speakerSuggestions: Record<string, { label: string; score: number }>;
   published: boolean;
   publishedBy: string | null;
   publishedAt: string | null;
@@ -195,4 +196,20 @@ export async function uploadAudio(
 // ---- ask ----
 export const askApi = {
   ask: (question: string, meetingId?: string) => post<{ text: string; citations: { id: string; label: string }[] }>('/ask', { question, meetingId })
+};
+
+// ---- audit log ----
+export interface AuditEntryRow {
+  id: string;
+  action: string;
+  target_type: string | null;
+  target_id: string | null;
+  meta: unknown;
+  created_at: string;
+  user_email: string | null;
+  user_name: string | null;
+}
+
+export const auditApi = {
+  list: (before?: string) => get<{ entries: AuditEntryRow[] }>('/audit' + (before ? `?before=${encodeURIComponent(before)}` : ''))
 };

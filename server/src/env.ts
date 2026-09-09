@@ -37,5 +37,16 @@ export const env = {
   },
 
   /** Base URL a human clicks to reach the app — used in emailed links. */
-  appUrl: process.env.APP_URL || 'http://localhost:5173'
+  appUrl: process.env.APP_URL || 'http://localhost:5173',
+
+  /** How long raw meeting audio is kept before the retention job deletes it (transcript/analysis are unaffected). */
+  audioRetentionDays: Number(process.env.AUDIO_RETENTION_DAYS || 30),
+
+  /**
+   * Picovoice Eagle AccessKey — enables real cross-meeting voice recognition
+   * (https://console.picovoice.ai/). Entirely optional: when unset, naming a
+   * speaker still works exactly as before, just without voiceprint
+   * enrollment/matching.
+   */
+  picovoiceAccessKey: process.env.PICOVOICE_ACCESS_KEY || ''
 };

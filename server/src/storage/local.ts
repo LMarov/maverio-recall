@@ -32,4 +32,8 @@ export class LocalDiskStorage implements StorageAdapter {
   async get(key: string): Promise<Buffer> {
     return fs.readFileSync(this.resolve(key));
   }
+
+  async delete(key: string): Promise<void> {
+    fs.rmSync(this.resolve(key), { force: true });
+  }
 }

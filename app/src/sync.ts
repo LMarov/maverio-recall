@@ -64,6 +64,9 @@ export function mapMeeting(row: MeetingRow, idToName: Record<string, string>): M
   const lines = row.lines.map((l) => ({ ...l, k: scopeSpeakerKey(row.id, l.k) }));
   const people = row.people.map((p) => scopeSpeakerKey(row.id, p));
   const actions = row.actions.map((a) => ({ ...a, who: scopeSpeakerKey(row.id, a.who) }));
+  const speakerSuggestions = Object.fromEntries(
+    Object.entries(row.speakerSuggestions || {}).map(([rawIndex, v]) => [scopeSpeakerKey(row.id, '?' + rawIndex), v])
+  );
   return {
     id: row.id,
     title: row.title,
@@ -86,6 +89,7 @@ export function mapMeeting(row: MeetingRow, idToName: Record<string, string>): M
     actions,
     fields: row.fields,
     lines,
+    speakerSuggestions,
     stage: row.stage,
     date: row.occurredAt,
     published: row.published,

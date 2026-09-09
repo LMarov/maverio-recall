@@ -6,6 +6,13 @@ export interface TranscriptLine {
   text: string;
 }
 
+/** A diarized speaker turn's raw timing — pipeline-internal, used to slice audio for voiceprint enrollment/identification. */
+export interface RawUtterance {
+  speaker: string;
+  start: number;
+  end: number;
+}
+
 function fmtTime(seconds: number): string {
   const s = Math.max(0, Math.round(seconds || 0));
   const m = Math.floor(s / 60);
@@ -35,6 +42,7 @@ export async function transcribeAudio(fileBuffer: Buffer, mimeType: string) {
     k: '?' + u.speaker,
     text: (u.transcript || '').trim()
   }));
+  const rawUtterances: RawUtterance[] = utterances.map((u) => ({ speaker: String(u.speaker), start: u.start, end: u.end }));
   const fullText: string = json?.results?.channels?.[0]?.alternatives?.[0]?.transcript || lines.map((l) => l.text).join(' ');
-  return { lines, speakerCount: speakerIds.length, fullText };
+  return { lines, speakerCount: speakerIds.length, fullText, rawUtterances };
 }

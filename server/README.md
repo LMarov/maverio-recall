@@ -14,8 +14,8 @@ into and shares.
   (`src/email/`) that defaults to logging to the console (no account
   needed) and can send for real over SMTP with any provider.
 - **Data** — clients, meetings (with decisions/actions/gaps/fields/
-  transcript lines), scheduled meetings, voice names, an audit log — all in
-  Postgres (`src/db/migrations/0001_init.sql`).
+  transcript lines), scheduled meetings, voice names, voiceprints, an audit
+  log — all in Postgres (`src/db/migrations/`).
 - **Audio + AI pipeline** — accepts an uploaded recording, stores it (S3 or
   local disk), transcribes it with Deepgram, analyzes it with Claude, and
   writes the result back onto the meeting row (`src/pipeline/`,
@@ -31,6 +31,25 @@ into and shares.
   analysis pipeline, and returns an answer plus citations back to the
   source meeting(s). Same API-key-stays-server-side rule as the rest of the
   pipeline.
+- **Audit log** — `GET /audit` (`src/routes/audit.ts`, owners/admins only)
+  reads back sign-ins, invites, client edits, publishes, and audio-retention
+  deletions written by `src/util/audit.ts`.
+- **Audio retention** — `src/jobs/retention.ts` runs daily, deleting the raw
+  audio blob (not the transcript/analysis) for any meeting past
+  `AUDIO_RETENTION_DAYS`, and logs the deletion to the audit log.
+- **Cross-meeting voice recognition** — `src/pipeline/voiceprint.ts` +
+  `src/pipeline/audioDecode.ts`. Optional: only runs when
+  `PICOVOICE_ACCESS_KEY` is set. Naming a speaker (`PUT
+  /meetings/meta/voice-names/:key`) decodes that meeting's audio, slices out
+  that speaker's turns, and enrolls a real voiceprint (Picovoice Eagle,
+  on-device speaker embeddings — only the derived profile is stored, never
+  raw audio, so it isn't affected by the retention job). Every new
+  meeting's still-unnamed speakers are then checked against every enrolled
+  voiceprint (`identifySpeakers`), and a match above threshold is written to
+  that meeting's `speaker_suggestions` — surfaced to the client purely as a
+  suggestion; a human still has to confirm it via the namer. With no key
+  set, this whole layer is skipped and naming a speaker behaves exactly as
+  it did before Phase 5.
 
 ## Setup
 
@@ -63,6 +82,8 @@ running the migration.
 | `EMAIL_FROM` | The "from" address on sent emails |
 | `SMTP_HOST` / `SMTP_PORT` / `SMTP_SECURE` / `SMTP_USER` / `SMTP_PASS` | Only used when `EMAIL_DRIVER=smtp` — works with any SMTP provider (Gmail, SES, Postmark, Mailgun, your own mail server, ...); no specific vendor required |
 | `APP_URL` | Included in emailed links — the app's own URL (default `http://localhost:5173`) |
+| `AUDIO_RETENTION_DAYS` | Days raw meeting audio is kept before the retention job deletes it (default `30`) — transcripts/analysis are unaffected |
+| `PICOVOICE_ACCESS_KEY` | Optional — enables real cross-meeting voice recognition (https://console.picovoice.ai/). Leave blank to skip it entirely |
 
 Invite and password-reset emails go through this same adapter
 (`src/email/`). Leave `EMAIL_DRIVER=console` for local dev — the email
@@ -100,7 +121,11 @@ npm run build && npm run dev:electron
   behind a single `StorageAdapter` interface.
 - `src/pipeline/` — `transcribe.ts` (Deepgram), `analyze.ts` (Claude),
   `process.ts` (orchestrates the two after an upload and broadcasts the
-  result), `ask.ts` (answers a question grounded in the team's meetings).
+  result, then runs voiceprint identification), `ask.ts` (answers a question
+  grounded in the team's meetings), `voiceprint.ts` (Picovoice Eagle
+  enroll/identify), `audioDecode.ts` (ffmpeg-static: compressed upload ->
+  16kHz mono PCM for Eagle).
+- `src/jobs/retention.ts` — the daily audio-retention job.
 - `src/realtime/hub.ts` — the websocket connection registry + `broadcast()`.
 - `src/email/` — the email abstraction (`console.ts` / `smtp.ts`) behind a
   single `EmailAdapter` interface, same pattern as `src/storage/`.
@@ -117,11 +142,18 @@ npm run build && npm run dev:electron
   server instance (this app's whole deployment model today), but would need
   a shared store (e.g. Redis) if this ever ran as multiple instances behind
   a load balancer.
-- The retention policy mentioned in the Knowledge base UI copy (30-day audio
-  retention) isn't enforced by a cron job yet — the audit log table exists
-  but nothing reads it back into a UI.
 - `/ask` has no real retrieval — it hands Claude the 50 most recent
   meetings' summaries (or one full meeting when scoped) rather than
   ranking/searching for the most relevant ones. Fine at the volume a team
   produces today; will need real full-text or vector search once there are
   hundreds of meetings.
+- Voiceprint enrollment isn't cumulative — naming a speaker rebuilds their
+  profile from that one meeting's audio, replacing whatever was there
+  before, rather than averaging across every meeting they've ever been
+  confirmed in.
+- Voiceprint matching genuinely requires a real `PICOVOICE_ACCESS_KEY` and
+  cannot be end-to-end verified in a sandbox without one (or without real
+  Deepgram network access to produce a transcript in the first place) — the
+  decode/slice/enroll/identify code paths are each verified in isolation,
+  but no one has watched a real "record → later recording auto-suggests the
+  same person" round trip happen end to end yet.

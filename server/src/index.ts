@@ -12,7 +12,9 @@ import { meetingsRouter } from './routes/meetings';
 import { scheduledRouter } from './routes/scheduled';
 import { audioRouter } from './routes/audio';
 import { askRouter } from './routes/ask';
+import { auditRouter } from './routes/audit';
 import { initRealtime } from './realtime/hub';
+import { startAudioRetentionJob } from './jobs/retention';
 
 const app = express();
 app.use(cors());
@@ -27,6 +29,7 @@ app.use('/meetings', meetingsRouter);
 app.use('/scheduled', scheduledRouter);
 app.use('/audio', audioRouter);
 app.use('/ask', askRouter);
+app.use('/audit', auditRouter);
 
 if (env.storageDriver === 'local') {
   app.use('/audio-files', express.static(path.resolve(env.localStorageDir)));
@@ -47,4 +50,5 @@ initRealtime(wss);
 
 server.listen(env.port, () => {
   console.log(`Maverio Recall server listening on :${env.port}`);
+  startAudioRetentionJob();
 });

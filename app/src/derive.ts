@@ -1,6 +1,7 @@
 import {
   AQ1,
   AQ2,
+  AUDIT_ACTION_LABELS,
   CLIENT_DOT_COLORS,
   CONTACT_COLORS,
   DURATION_OPTIONS,
@@ -11,8 +12,12 @@ import {
   PR,
   PRACTICES,
   STAGES,
+  attendeeFromContact,
+  attendeeFromTeamMember,
   hm,
   ini,
+  nameFromEmail,
+  resolveAttendeeKey,
   wave
 } from './data';
 import type { Meeting, PersonKey, PracticeName, ScheduledMeeting } from './data';
@@ -43,14 +48,6 @@ export interface Methods {
 }
 
 const asPerson = (k: string) => P[k as PersonKey];
-
-/** A pending invite has no name yet (the invitee hasn't set one) — derive a readable placeholder from their email. */
-const nameFromEmail = (email: string) =>
-  email
-    .split('@')[0]
-    .split(/[._-]/)
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(' ');
 
 function publishState(s: AppState, m: Meeting) {
   const override = s.publishOverrides[m.id];
@@ -224,8 +221,10 @@ export function buildView(s: AppState, methods: Methods) {
   }
 
   // Demo meetings use a small fixed list of recurring unnamed voices. Real
-  // recordings have no cross-meeting voice matching (see chat), so every
-  // unnamed speaker key is scoped to its one meeting — surface those too.
+  // recordings scope every unnamed speaker key to its one meeting, but when
+  // Picovoice voiceprint matching is enabled server-side, `speakerSuggestions`
+  // carries a real cross-meeting guess to prefill here — still just a
+  // suggestion a human has to confirm via the namer.
   const dynamicPending: (typeof PENDING_VOICE_DEFS)[number][] = [];
   const seenDynamic = new Set<string>();
   ALL.forEach((m) => {
@@ -234,13 +233,16 @@ export function buildView(s: AppState, methods: Methods) {
         seenDynamic.add(l.k);
         const idxPart = l.k.slice(l.k.lastIndexOf(':') + 1);
         const n = Number(idxPart);
+        const match = m.speakerSuggestions?.[l.k];
         dynamicPending.push({
           k: l.k,
           label: 'VOICE ' + (Number.isFinite(n) ? n + 1 : idxPart),
           meta: '1 meeting · ' + (s.titles[m.id] || m.title),
-          hint: 'From your recording — name this speaker to apply it across this meeting.',
+          hint: match
+            ? `Recall thinks this might be ${match.label} (${Math.round(match.score * 100)}% voiceprint match) — confirm or pick a different name.`
+            : 'From your recording — name this speaker to apply it across this meeting.',
           seed: ((m.id.length + idx) % 7) + 1,
-          suggest: []
+          suggest: match ? [match.label] : []
         });
       }
     });
@@ -411,8 +413,12 @@ export function buildView(s: AppState, methods: Methods) {
         ? Math.floor(s.secs / 3600) + 'h ' + String(Math.floor(s.secs / 60) % 60).padStart(2, '0') + 'm ' + String(s.secs % 60).padStart(2, '0') + 's'
         : String(Math.floor(s.secs / 60)).padStart(2, '0') + ':' + String(s.secs % 60).padStart(2, '0'),
     liveSpeakers: (() => {
+      const prepContacts = s.clientData[s.prepClient]?.contacts || [];
       const roster = [
-        ...s.attendees.map((k) => ({ name: asPerson(k).n.split(' ')[0], ini: ini(asPerson(k).n), color: asPerson(k).c, known: true })),
+        ...s.attendees.map((k) => {
+          const a = resolveAttendeeKey(k, s.team, prepContacts);
+          return { name: a.name.split(' ')[0], ini: ini(a.name), color: a.color, known: true };
+        }),
         ...Array.from({ length: s.guests }, (_, i) => ({ name: 'VOICE ' + (i + 1), ini: '?', color: '#8A9AA3', known: false }))
       ];
       const detected = roster.filter((_, i) => s.secs >= 3 + i * 6);
@@ -1042,19 +1048,32 @@ export function buildView(s: AppState, methods: Methods) {
       if (!v) return;
       patch((p) => ({ outcomes: [...p.outcomes, v], outcomeDraft: '' }));
     },
-    voicePicks: Object.keys(P).map((k) => {
-      const on = s.attendees.includes(k);
-      return {
-        name: asPerson(k).n.split(' ')[0],
-        ini: ini(asPerson(k).n),
-        color: asPerson(k).c,
-        role: asPerson(k).r,
-        toggle: () => patch((p) => ({ attendees: on ? p.attendees.filter((x) => x !== k) : [...p.attendees, k] })),
-        bg: on ? 'var(--tint)' : 'transparent',
-        fg: on ? 'var(--ink)' : 'var(--ink2)',
-        border: on ? AQ1 : 'var(--line)'
-      };
-    }),
+    voicePicks: (() => {
+      const prepContacts = s.clientData[s.prepClient]?.contacts || [];
+      const options = new Map<string, { name: string; color: string; role: string }>();
+      for (const t of s.team) {
+        if (t.status !== 'active') continue;
+        const a = attendeeFromTeamMember(t);
+        options.set(a.key, a);
+      }
+      for (const c of prepContacts) {
+        const a = attendeeFromContact(c, s.prepClient);
+        if (!options.has(a.key)) options.set(a.key, a);
+      }
+      return [...options.entries()].map(([k, a]) => {
+        const on = s.attendees.includes(k);
+        return {
+          name: a.name.split(' ')[0],
+          ini: ini(a.name),
+          color: a.color,
+          role: a.role,
+          toggle: () => patch((p) => ({ attendees: on ? p.attendees.filter((x) => x !== k) : [...p.attendees, k] })),
+          bg: on ? 'var(--tint)' : 'transparent',
+          fg: on ? 'var(--ink)' : 'var(--ink2)',
+          border: on ? AQ1 : 'var(--line)'
+        };
+      });
+    })(),
     guests: Array.from({ length: s.guests }, (_, i) => ({
       label: 'Expected guest ' + (i + 1),
       remove: () => patch((p) => ({ guests: Math.max(0, p.guests - 1) }))
@@ -1227,6 +1246,17 @@ export function buildView(s: AppState, methods: Methods) {
       lockDisplay: isOwner ? 'none' : 'inline-block',
       track: s.settings[x.k] ? 'linear-gradient(90deg,' + AQ1 + ',' + AQ2 + ')' : 'var(--panel3)',
       knob: s.settings[x.k] ? '22px' : '3px'
+    })),
+
+    auditVisible: isAdmin,
+    auditLoading: s.auditLoading,
+    auditError: s.auditError,
+    auditLog: s.auditLog.map((e) => ({
+      id: e.id,
+      label: AUDIT_ACTION_LABELS[e.action] || e.action,
+      who: e.user_name || (e.user_email ? nameFromEmail(e.user_email) : 'System'),
+      target: e.target_type ? e.target_type + (e.target_id ? ' · ' + e.target_id.slice(0, 8) : '') : '',
+      when: new Date(e.created_at).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
     })),
 
     chat: s.chat.map((c) => ({

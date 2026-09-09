@@ -1,5 +1,5 @@
 import type { ClientRecord, Meeting, MeetingType, PracticeName, Role, Scope, ScheduledMeeting, TeamMember } from './data';
-import type { AuthUser } from './api';
+import type { AuditEntryRow, AuthUser } from './api';
 
 export interface ChatCite {
   id: string;
@@ -102,6 +102,9 @@ export interface AppState {
   copied: boolean;
 
   settings: CaptureSettings;
+  auditLog: AuditEntryRow[];
+  auditLoading: boolean;
+  auditError: string | null;
 
   w: number;
   railOpen: boolean;

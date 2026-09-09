@@ -8,6 +8,7 @@ export interface StorageAdapter {
   /** Return a URL (or presigned URL) the client can use to fetch the file directly. */
   getReadUrl(key: string): Promise<string>;
   get(key: string): Promise<Buffer>;
+  delete(key: string): Promise<void>;
 }
 
 export const storage: StorageAdapter = env.storageDriver === 's3' ? new S3Storage() : new LocalDiskStorage();

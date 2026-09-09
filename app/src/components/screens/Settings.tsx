@@ -35,6 +35,42 @@ export function SettingsScreen({ view }: { view: ViewModel }) {
         Recall never joins the call as a participant and adds no plugin — it captures the Mac's own audio output plus your microphone. Recording law varies by state and country; keep{' '}
         <strong style={{ color: 'var(--ink)' }}>Disclosure prompt</strong> on unless your legal counsel has cleared one-party consent for the jurisdictions you work in.
       </div>
+
+      {view.auditVisible && (
+        <div style={{ marginTop: 28 }}>
+          <div style={{ font: '700 13px Manrope,sans-serif', color: 'var(--ink)', marginBottom: 3 }}>Audit log</div>
+          <div style={{ font: '500 11.5px/1.55 Manrope,sans-serif', color: 'var(--ink2)', marginBottom: 12 }}>
+            Sign-ins, invites, client edits, publishes, and audio deletions under the 30-day retention policy — owners and admins only.
+          </div>
+          {view.auditLoading ? (
+            <div style={{ font: '500 12px Manrope,sans-serif', color: 'var(--ink3)' }}>Loading…</div>
+          ) : view.auditError ? (
+            <div style={{ font: '500 12px Manrope,sans-serif', color: '#FF6A00' }}>{view.auditError}</div>
+          ) : view.auditLog.length === 0 ? (
+            <div style={{ font: '500 12px Manrope,sans-serif', color: 'var(--ink3)' }}>Nothing recorded yet.</div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', border: '1px solid var(--line)', borderRadius: 11, overflow: 'hidden' }}>
+              {view.auditLog.map((e, i) => (
+                <div
+                  key={e.id}
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr auto auto',
+                    gap: 14,
+                    alignItems: 'center',
+                    padding: '10px 15px',
+                    borderTop: i === 0 ? 'none' : '1px solid var(--line)'
+                  }}
+                >
+                  <span style={{ font: '600 12px Manrope,sans-serif', color: 'var(--ink)' }}>{e.label}</span>
+                  <span style={{ font: '500 11.5px Manrope,sans-serif', color: 'var(--ink3)' }}>{e.who}</span>
+                  <span style={{ font: '500 11.5px Manrope,sans-serif', color: 'var(--ink3)', whiteSpace: 'nowrap' }}>{e.when}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

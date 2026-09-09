@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import { ANSWERS, P, PR, hm, ini, replaceAll } from './data';
+import { ANSWERS, P, PR, hm, ini, replaceAll, resolveAttendeeKey } from './data';
 import type { Meeting, PersonKey, ScheduledMeeting } from './data';
 import { createInitialState } from './initialState';
 import type { AppState, NamerTarget, StatePatch } from './types';
 import { buildView } from './derive';
 import { loadPersisted, savePersisted } from './persistence';
 import { startRecording, type ActiveRecording } from './capture';
-import { askApi, authApi, clientsApi, meetingsApi, scheduledApi, setAuthToken, teamApi, uploadAudio } from './api';
+import { ApiError, askApi, auditApi, authApi, clientsApi, meetingsApi, scheduledApi, setAuthToken, teamApi, uploadAudio } from './api';
 import { mapClients, mapMeeting, mapScheduled, mapTeam, scopeSpeakerKey } from './sync';
 import { connectRealtime, disconnectRealtime, onRealtimeEvent } from './realtime';
 
@@ -193,6 +193,17 @@ export function useApp() {
   }, []);
 
   const go = (screen: AppState['screen']) => patch((s) => ({ screen, query: screen === 'search' ? s.query : '' }));
+
+  // The audit log is owner/admin-only and small enough to just refetch on every
+  // visit to Capture & policy rather than keep it live over the websocket.
+  useEffect(() => {
+    if (state.screen !== 'settings' || !state.authToken) return;
+    patch({ auditLoading: true, auditError: null });
+    auditApi
+      .list()
+      .then(({ entries }) => patch({ auditLog: entries, auditLoading: false }))
+      .catch((e) => patch({ auditLoading: false, auditError: e instanceof ApiError ? e.message : 'Could not load the audit log' }));
+  }, [state.screen, state.authToken]);
 
   const mockLines = (s: AppState) => {
     const who = s.attendees.length ? s.attendees : ['DO'];
@@ -471,7 +482,10 @@ export function useApp() {
       const label = colon === -1 ? rest : String(Number(rest.slice(colon + 1)) + 1);
       return { name: 'VOICE ' + label, color: '#8A9AA3', conf: '92% distinct' };
     }
-    return { name: P[k as PersonKey].n, color: P[k as PersonKey].c, conf: 'voiceprint' };
+    const s = stateRef.current;
+    const contacts = s.clientData[s.prepClient]?.contacts || [];
+    const resolved = resolveAttendeeKey(k, s.team, contacts);
+    return { name: resolved.name, color: resolved.color, conf: 'voiceprint' };
   };
 
   const md = (m: Meeting) => {

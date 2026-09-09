@@ -41,6 +41,73 @@ export const P: Record<PersonKey, PersonMeta> = {
 export const ini = (n: string) =>
   n.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase();
 
+/** A pending invite or client contact has no name yet, or none we've seen — derive a readable one from their email. */
+export const nameFromEmail = (email: string) =>
+  email
+    .split('@')[0]
+    .split(/[._-]/)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+
+export const TEAM_COLORS = ['#4192B9', '#27AC53', '#7835FE', '#FF6A00', '#C9A24A', '#0195BD', '#88DB0D', '#AC51F6'];
+
+export const AUDIT_ACTION_LABELS: Record<string, string> = {
+  login: 'Signed in',
+  accept_invite: 'Accepted invite',
+  reset_password: 'Reset password',
+  invite: 'Invited a teammate',
+  create_client: 'Created a client',
+  update_client: 'Edited a client',
+  archive_client: 'Archived a client',
+  restore_client: 'Restored a client',
+  publish: 'Published a meeting',
+  unpublish: 'Unpublished a meeting',
+  audio_retention_delete: 'Deleted raw audio (retention policy)'
+};
+
+/** A stable, deterministic avatar color for anyone who isn't one of the fixed demo people in `P`. */
+export const colorForKey = (key: string) => {
+  let hash = 0;
+  for (let i = 0; i < key.length; i++) hash = (hash * 31 + key.charCodeAt(i)) >>> 0;
+  return TEAM_COLORS[hash % TEAM_COLORS.length];
+};
+
+export interface AttendeeOption {
+  key: string;
+  name: string;
+  color: string;
+  role: string;
+}
+
+/** The attendee-chip identity for a real team member: their fixed PersonKey if they're one of the
+ * original demo people, otherwise their email — with a name/color that work either way. */
+export function attendeeFromTeamMember(t: TeamMember): AttendeeOption {
+  if (t.k) return { key: t.k, name: P[t.k].n, color: P[t.k].c, role: P[t.k].r };
+  const name = t.name || nameFromEmail(t.email);
+  return { key: t.email, name, color: colorForKey(t.email), role: t.role + ' · Maverio' };
+}
+
+/** Same, for a client-side contact — keyed by email when they have one, else their name. */
+export function attendeeFromContact(c: { name: string; role?: string; email?: string }, clientName: string): AttendeeOption {
+  const key = c.email || c.name;
+  return { key, name: c.name, color: colorForKey(key), role: (c.role || 'Contact') + ' · ' + clientName };
+}
+
+/** Resolves any attendee key — a demo PersonKey, a real teammate's email, or a client contact's
+ * email/name — back to a display name + color, for places that only have the key (e.g. a
+ * previously-saved attendee list) and not the full option list it was chosen from. */
+export function resolveAttendeeKey(key: string, team: TeamMember[], contacts: { name: string; role?: string; email?: string }[] = []): { name: string; color: string } {
+  if (key in P) return { name: P[key as PersonKey].n, color: P[key as PersonKey].c };
+  const member = team.find((t) => (t.k || t.email) === key);
+  if (member) {
+    const a = attendeeFromTeamMember(member);
+    return { name: a.name, color: a.color };
+  }
+  const contact = contacts.find((c) => (c.email || c.name) === key);
+  if (contact) return { name: contact.name, color: colorForKey(key) };
+  return { name: nameFromEmail(key), color: colorForKey(key) };
+}
+
 export const replaceAll = (str: string, find: string, rep: string) => str.split(find).join(rep);
 
 export const hm = (v: string | number) => {
@@ -121,6 +188,8 @@ export interface Meeting {
   publishedBy?: string;
   publishedAt?: string;
   titleEdited?: boolean;
+  /** Voiceprint's best guess for still-unnamed speakers, keyed the same scoped way as `people`/`lines[].k`. A suggestion only — never applied without a human confirming it. */
+  speakerSuggestions?: Record<string, { label: string; score: number }>;
 }
 
 export const MEET: Meeting[] = [
