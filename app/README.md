@@ -87,6 +87,23 @@ these environment variables are set before `npm run dist`:
 Leave all of these unset for a local unsigned build — `npm run dist` still
 works, it just isn't distributable to other machines.
 
+### Testing
+
+```bash
+npm test   # vitest run
+```
+
+Unit tests for the pure, view-model-adjacent logic — `data.ts`'s attendee
+resolvers, `sync.ts`'s server-row mappers, and `derive.ts`'s `buildView`
+itself against realistic `AppState` fixtures. `derive.ts` computes the
+*entire* view-model unconditionally on every render regardless of which
+screen is active, which is exactly why an unsafe lookup on one screen's
+data has twice now crashed every other screen too (a real teammate with no
+fixed-demo `k`; a real per-meeting speaker key) — `derive.test.ts` targets
+that exact pattern directly, across every screen, not just the current
+one. No server, no Electron, and no browser needed — these run against
+plain Node.
+
 ## What's real vs. still mocked (Phase 7)
 
 **Real, shared across the team via the server:**
@@ -160,6 +177,7 @@ works, it just isn't distributable to other machines.
 
 - `build/entitlements.mac.plist` — hardened-runtime entitlements for
   signing/notarization, see "Signing & notarization" above.
+- `src/*.test.ts` — the test suite, see "Testing" above.
 - `electron/main.cjs` — window + local IPC handlers (screen-source picker,
   mic permission, saving a recording to a temp file), plus the
   `maveriorecall://` custom-protocol registration and deep-link parsing

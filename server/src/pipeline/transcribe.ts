@@ -13,7 +13,7 @@ export interface RawUtterance {
   end: number;
 }
 
-function fmtTime(seconds: number): string {
+export function fmtTime(seconds: number): string {
   const s = Math.max(0, Math.round(seconds || 0));
   const m = Math.floor(s / 60);
   const r = s % 60;

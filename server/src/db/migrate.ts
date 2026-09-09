@@ -3,7 +3,8 @@ import fs from 'fs';
 import path from 'path';
 import { pool } from './pool';
 
-async function main() {
+/** Applies any migration under db/migrations not yet recorded in schema_migrations. Reused by both `npm run migrate` (migrate-cli.ts) and the test suite's setup. */
+export async function runMigrations(): Promise<void> {
   await pool.query(`
     create table if not exists schema_migrations (
       name text primary key,
@@ -36,11 +37,4 @@ async function main() {
       client.release();
     }
   }
-
-  await pool.end();
 }
-
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});

@@ -116,6 +116,31 @@ npm run build && npm run dev:electron
 # 4. Sign in as lana@maverio.com / recall-dev-1 (or any of the 5 seeded accounts)
 ```
 
+## Testing
+
+```bash
+npm test
+```
+
+Runs `tsc -p tsconfig.test.json` (typechecks the test files too, since
+they're excluded from the production build) and then Vitest:
+
+- **Unit tests** need nothing beyond the code itself —
+  `src/util/rateLimit.test.ts`, `src/auth/jwt.test.ts`,
+  `src/pipeline/voiceprint.test.ts`, `src/pipeline/transcribe.test.ts`.
+- **Integration tests** (`src/routes/*.test.ts`) exercise the real Express
+  app end to end with `supertest`, against a real Postgres database — not
+  mocks. `src/testSetup.ts` derives a `<database>_test` sibling database
+  from `DATABASE_URL`, creates it if missing, and migrates it before the
+  suite runs; `src/testDb.ts` truncates every table between tests so they
+  stay isolated from each other and never touch your real dev data.
+
+The role in `DATABASE_URL` needs `CREATEDB` privilege the first time (so
+`testSetup.ts` can create the sibling test database itself) —
+`ALTER ROLE recall CREATEDB;` as a superuser, or just pre-create
+`<database>_test` yourself and skip that requirement. CI's Postgres service
+container gets this automatically (its default role is a superuser).
+
 ## Production deployment
 
 ```bash
@@ -172,8 +197,13 @@ have been.
 
 - `Dockerfile`, `docker-compose.yml`, `.dockerignore` — the production
   deploy artifacts, see "Production deployment" above.
-- `src/index.ts` — Express app + http/websocket server bootstrap.
+- `src/index.ts` — http/websocket server bootstrap (imports the Express app
+  from `src/app.ts` and starts listening); `src/app.ts` builds the Express
+  app itself with no listening socket, so tests can import it directly.
 - `src/env.ts` — typed env var access.
+- `src/testSetup.ts`, `src/testDb.ts`, `**/*.test.ts` — the test suite, see
+  "Testing" above. Excluded from the production build
+  (`tsconfig.json`'s `exclude`).
 - `src/db/` — Postgres pool, a tiny SQL-file migration runner, the seed script.
 - `src/auth/` — password hashing, JWT sign/verify, the `requireAuth` middleware.
 - `src/routes/` — one file per resource (`auth`, `team`, `clients`,
