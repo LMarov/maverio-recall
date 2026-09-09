@@ -3,6 +3,8 @@ import http from 'http';
 import path from 'path';
 import cors from 'cors';
 import express from 'express';
+import helmet from 'helmet';
+import morgan from 'morgan';
 import { WebSocketServer } from 'ws';
 import { env } from './env';
 import { authRouter } from './routes/auth';
@@ -17,7 +19,26 @@ import { initRealtime } from './realtime/hub';
 import { startAudioRetentionJob } from './jobs/retention';
 
 const app = express();
-app.use(cors());
+
+// Only meaningful behind a reverse proxy/load balancer (set TRUST_PROXY=1) —
+// otherwise rate limiting and req.ip would see the proxy's address for every
+// request instead of the real client's.
+app.set('trust proxy', env.trustProxy);
+
+app.use(
+  helmet({
+    // This API's only cross-origin consumer is the desktop app fetching its
+    // own audio files back (local storage driver) — same-origin (the
+    // default) would block that in production.
+    crossOriginResourcePolicy: { policy: 'cross-origin' }
+  })
+);
+app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
+
+const corsOptions: cors.CorsOptions = env.corsOrigins.includes('*')
+  ? {}
+  : { origin: (origin, cb) => cb(null, !origin || env.corsOrigins.includes(origin)) };
+app.use(cors(corsOptions));
 app.use(express.json({ limit: '2mb' }));
 
 app.get('/health', (_req, res) => res.json({ ok: true }));

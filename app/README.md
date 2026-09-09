@@ -62,6 +62,31 @@ npm run build   # type-check + Vite production build -> dist/
 npm run dist    # build + package a macOS app with electron-builder
 ```
 
+### Signing & notarization
+
+`npm run dist` produces an unsigned `.dmg` by default — fine for your own
+testing, but macOS Gatekeeper will block it on anyone else's machine unless
+it's signed with a real Apple Developer ID and notarized. This only works
+running on an actual Mac (code signing/notarization shell out to `codesign`
+and `xcrun notarytool`) with a paid Apple Developer Program membership —
+neither is available in this sandbox, so this has been configured but never
+actually run.
+
+`electron-builder` (see `build.mac` in `package.json`,
+`build/entitlements.mac.plist`) already has hardened runtime + the
+entitlements Electron needs under it, and the microphone usage description
+Recall's mic capture requires. It signs and notarizes automatically once
+these environment variables are set before `npm run dist`:
+
+| Env var | For |
+|---|---|
+| `CSC_LINK` / `CSC_KEY_PASSWORD` | Path (or base64) to your Developer ID Application `.p12` certificate + its password — code signing |
+| `APPLE_ID` / `APPLE_APP_SPECIFIC_PASSWORD` / `APPLE_TEAM_ID` | Notarization via an app-specific password (simplest) |
+| `APPLE_API_KEY` / `APPLE_API_KEY_ID` / `APPLE_API_ISSUER` | Notarization via an App Store Connect API key (alternative to the above) |
+
+Leave all of these unset for a local unsigned build — `npm run dist` still
+works, it just isn't distributable to other machines.
+
 ## What's real vs. still mocked (Phase 5)
 
 **Real, shared across the team via the server:**
@@ -123,6 +148,8 @@ npm run dist    # build + package a macOS app with electron-builder
 
 ## Structure
 
+- `build/entitlements.mac.plist` — hardened-runtime entitlements for
+  signing/notarization, see "Signing & notarization" above.
 - `electron/main.cjs` — window + local IPC handlers (screen-source picker,
   mic permission, saving a recording to a temp file). The old local
   store/transcribe/analyze IPC handlers (`electron/store.cjs`,

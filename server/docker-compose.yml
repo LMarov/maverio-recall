@@ -1,0 +1,80 @@
+# A production-like local stack: Postgres + MinIO (S3-compatible storage) +
+# the server itself, all in containers. Real production deploys can swap
+# Postgres/MinIO for managed services (RDS, S3) and just run the `server`
+# image — see README.md "Production deployment".
+#
+# Usage:
+#   cp .env.example .env   # fill in JWT_SECRET, DEEPGRAM_API_KEY, ANTHROPIC_API_KEY, etc.
+#   docker compose up --build
+#   docker compose exec server npm run migrate
+#   docker compose exec server npm run seed   # optional, dev-only sample data
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: recall
+      POSTGRES_PASSWORD: recall
+      POSTGRES_DB: recall
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U recall']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  minio:
+    image: minio/minio:latest
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - minio_data:/data
+    ports:
+      - '9001:9001' # MinIO web console, optional
+    healthcheck:
+      test: ['CMD', 'mc', 'ready', 'local']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  createbucket:
+    image: minio/mc:latest
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set local http://minio:9000 minioadmin minioadmin &&
+      mc mb --ignore-existing local/recall-audio &&
+      exit 0
+      "
+
+  server:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      createbucket:
+        condition: service_completed_successfully
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://recall:recall@postgres:5432/recall
+      STORAGE_DRIVER: s3
+      S3_ENDPOINT: http://minio:9000
+      S3_BUCKET: recall-audio
+      S3_ACCESS_KEY_ID: minioadmin
+      S3_SECRET_ACCESS_KEY: minioadmin
+      S3_FORCE_PATH_STYLE: 'true'
+      NODE_ENV: production
+    ports:
+      - '8787:8787'
+
+volumes:
+  postgres_data:
+  minio_data:

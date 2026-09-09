@@ -6,11 +6,26 @@ function required(name: string): string {
   return v;
 }
 
+function parseTrustProxy(v: string | undefined): boolean | number {
+  if (!v) return false;
+  if (v === 'true') return 1;
+  if (v === 'false') return false;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : false;
+}
+
 export const env = {
   port: Number(process.env.PORT || 8787),
   databaseUrl: required('DATABASE_URL'),
   jwtSecret: required('JWT_SECRET'),
+  /** Lets JWT_SECRET be rotated without logging out every session: tokens signed with the old secret keep verifying until it's dropped. */
+  jwtSecretPrevious: process.env.JWT_SECRET_PREVIOUS || '',
   allowedEmailDomain: process.env.ALLOWED_EMAIL_DOMAIN || 'maverio.com',
+
+  /** Comma-separated allowed origins, or '*' (default — matches pre-Phase-6 behavior). Set to the real app origin(s) in production. */
+  corsOrigins: (process.env.CORS_ORIGIN || '*').split(',').map((s) => s.trim()).filter(Boolean),
+  /** Express 'trust proxy' setting — set TRUST_PROXY=1 when running behind a single reverse proxy/load balancer, so rate limiting and req.ip see the real client IP instead of the proxy's. Off by default (direct connections, e.g. local dev). */
+  trustProxy: parseTrustProxy(process.env.TRUST_PROXY),
 
   storageDriver: (process.env.STORAGE_DRIVER || 'local') as 'local' | 's3',
   localStorageDir: process.env.LOCAL_STORAGE_DIR || './data/audio',

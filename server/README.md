@@ -84,6 +84,10 @@ running the migration.
 | `APP_URL` | Included in emailed links — the app's own URL (default `http://localhost:5173`) |
 | `AUDIO_RETENTION_DAYS` | Days raw meeting audio is kept before the retention job deletes it (default `30`) — transcripts/analysis are unaffected |
 | `PICOVOICE_ACCESS_KEY` | Optional — enables real cross-meeting voice recognition (https://console.picovoice.ai/). Leave blank to skip it entirely |
+| `JWT_SECRET_PREVIOUS` | Optional — set to the old `JWT_SECRET` while rotating it, so existing sessions keep verifying until they expire |
+| `CORS_ORIGIN` | Comma-separated allowed origins, or `*` (default) |
+| `TRUST_PROXY` | Set to `1` when running behind a single reverse proxy/load balancer, so rate limiting and `req.ip` see the real client IP |
+| `NODE_ENV` | `production` switches request logging to the fuller `combined` format; anything else uses the terser `dev` format |
 
 Invite and password-reset emails go through this same adapter
 (`src/email/`). Leave `EMAIL_DRIVER=console` for local dev — the email
@@ -109,8 +113,62 @@ npm run build && npm run dev:electron
 # 4. Sign in as lana@maverio.com / recall-dev-1 (or any of the 5 seeded accounts)
 ```
 
+## Production deployment
+
+```bash
+cp .env.example .env   # fill in real secrets — see below
+docker compose up --build -d
+docker compose exec server npm run migrate
+```
+
+`docker-compose.yml` runs a production-like stack — Postgres, MinIO
+(S3-compatible storage), and the server itself, each in its own container —
+for a self-hosted deploy or local testing of the packaged image. The
+`Dockerfile` is a multi-stage build producing a small runtime image
+(`node dist/index.js`, matching `npm start`) with a `/health`-backed
+`HEALTHCHECK` your orchestrator can also point a load balancer health check
+at. It's Debian-based rather than Alpine — `@picovoice/eagle-node` ships a
+glibc-linked native binary that won't load under musl.
+
+For a real deploy (not just local docker-compose), a few things change from
+the dev defaults:
+
+- **Storage**: point `STORAGE_DRIVER=s3` at a real bucket (AWS S3, or a
+  self-hosted MinIO you actually run in production) — `STORAGE_DRIVER=local`
+  is dev-only, see above.
+- **Email**: set `EMAIL_DRIVER=smtp` with real credentials so invite/reset
+  emails actually deliver, instead of only logging to the console.
+- **Secrets**: use a long random `JWT_SECRET`. To rotate it without logging
+  everyone out, set the new value as `JWT_SECRET` and the old one as
+  `JWT_SECRET_PREVIOUS` for 30 days (session lifetime), then drop the
+  latter.
+- **Reverse proxy**: put this behind a TLS-terminating reverse proxy (Caddy
+  is the least-setup option for automatic HTTPS; nginx + certbot works too)
+  rather than exposing the server directly. Once you do, set
+  `TRUST_PROXY=1` so rate limiting and `req.ip` see the real client IP
+  instead of the proxy's, and set `CORS_ORIGIN` if this API ever gains a
+  web (browser-based) client — the desktop app itself doesn't have a fixed
+  origin the way a website would, so `*` (the default) is fine for the
+  architecture as it stands today.
+- **Migrations**: run `npm run migrate` as a one-off command after each
+  deploy (`docker compose exec server npm run migrate`, or the equivalent
+  one-off task on your platform) — the server doesn't migrate itself on
+  boot, so a botched migration can't silently take down a running instance.
+- **Scaling**: `rateLimit.ts`'s in-memory counters and the websocket
+  connection registry (`realtime/hub.ts`) are both per-process — this all
+  assumes a single server instance. Running more than one behind a load
+  balancer needs a shared store (e.g. Redis) for both.
+
+None of this — the Dockerfile, docker-compose stack, or the reverse-proxy
+setup — has been run end to end in this sandbox (no Docker daemon
+available here to actually `docker build`/`docker run`); it's been reviewed
+carefully but not exercised live the way the rest of this app's features
+have been.
+
 ## Structure
 
+- `Dockerfile`, `docker-compose.yml`, `.dockerignore` — the production
+  deploy artifacts, see "Production deployment" above.
 - `src/index.ts` — Express app + http/websocket server bootstrap.
 - `src/env.ts` — typed env var access.
 - `src/db/` — Postgres pool, a tiny SQL-file migration runner, the seed script.
