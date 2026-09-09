@@ -1,0 +1,2050 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<template id="__bundler_thumbnail" data-bg-color="#0E1A22">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <rect width="1200" height="800" fill="#0E1A22"/>
+    <circle cx="600" cy="360" r="150" fill="none" stroke="#4192B9" stroke-width="16"/>
+    <rect x="576" y="270" width="48" height="130" rx="24" fill="#5AC3A7"/>
+    <rect x="592" y="430" width="16" height="70" rx="8" fill="#5AC3A7"/>
+    <rect x="470" y="560" width="260" height="18" rx="9" fill="#4192B9"/>
+    <rect x="520" y="606" width="160" height="14" rx="7" fill="#2A4250"/>
+  </svg>
+</template>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --canvas:#E9EDEF; --panel:#FFFFFF; --panel2:#F5F7F8; --panel3:#EDF1F2;
+  --line:rgba(22,35,43,.11); --line2:rgba(22,35,43,.06);
+  --ink:#16232B; --ink2:rgba(22,35,43,.60); --ink3:rgba(22,35,43,.38);
+  --bar:#FBFCFC; --shadow:0 24px 70px rgba(22,35,43,.18); --tint:rgba(65,146,185,.09);
+  --aqua1:#4192B9; --aqua2:#5AC3A7;
+}
+[data-theme="dark"]{
+  --canvas:#0A1116; --panel:#16232B; --panel2:#1B2A33; --panel3:#22333D;
+  --line:rgba(255,255,255,.10); --line2:rgba(255,255,255,.055);
+  --ink:#EDF3F5; --ink2:rgba(237,243,245,.62); --ink3:rgba(237,243,245,.36);
+  --bar:#121D24; --shadow:0 24px 70px rgba(0,0,0,.55); --tint:rgba(90,195,167,.12);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--canvas);font-family:Manrope,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:var(--aqua1);text-decoration:none}
+a:hover{color:var(--aqua2)}
+input,button,textarea{font-family:inherit}
+button{cursor:pointer}
+input:focus,textarea:focus{outline:none}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-thumb{background:var(--ink3);border-radius:6px;border:3px solid transparent;background-clip:content-box}
+::-webkit-scrollbar-track{background:transparent}
+@keyframes lvl{0%,100%{transform:scaleY(.22)}50%{transform:scaleY(1)}}
+@keyframes recdot{0%,100%{opacity:1}50%{opacity:.25}}
+@keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes ring{0%{box-shadow:0 0 0 0 rgba(255,106,0,.45)}100%{box-shadow:0 0 0 12px rgba(255,106,0,0)}}
+</style>
+</helmet>
+
+<div data-theme="{{ theme }}" style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:26px 22px;background:var(--canvas)">
+
+<div style="width:100%;max-width:1300px;height:min(834px,90vh);display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:15px;box-shadow:var(--shadow);overflow:hidden;position:relative">
+
+  <!-- titlebar -->
+  <div style="flex:none;height:52px;display:flex;align-items:center;gap:16px;padding:0 16px;background:var(--bar);border-bottom:1px solid var(--line)">
+    <div style="display:flex;gap:8px;flex:none">
+      <span style="width:12px;height:12px;border-radius:50%;background:#FF5F57;display:block"></span>
+      <span style="width:12px;height:12px;border-radius:50%;background:#FEBC2E;display:block"></span>
+      <span style="width:12px;height:12px;border-radius:50%;background:#28C840;display:block"></span>
+    </div>
+    <button onClick="{{ goBack }}" title="{{ backLabel }}" style="display:{{ backDisplay }};align-items:center;gap:6px;height:28px;padding:0 10px 0 8px;border-radius:8px;border:1px solid var(--line);background:var(--panel3);color:var(--ink);font:700 11.5px Manrope,sans-serif;flex:none" style-hover="border-color:var(--aqua1)">
+      <span style="font-size:13px;line-height:1">←</span>{{ backLabel }}
+    </button>
+    <div style="font:600 12.5px Manrope,sans-serif;color:var(--ink2);letter-spacing:.01em;flex:none;display:{{ chromeTitleDisplay }}">Recall</div>
+
+    <div style="flex:1;display:flex;justify-content:center;min-width:0">
+      <div style="display:flex;align-items:center;gap:8px;width:100%;max-width:420px;height:30px;padding:0 11px;border-radius:8px;background:var(--panel3);border:1px solid var(--line2)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" style="color:var(--ink3);flex:none"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg>
+        <input value="{{ query }}" onChange="{{ onQuery }}" placeholder="Search every meeting, decision, or speaker" style="flex:1;min-width:0;border:0;background:transparent;font:500 12.5px Manrope,sans-serif;color:var(--ink)">
+        <span style="font:500 10px JetBrains Mono,monospace;color:var(--ink3);flex:none">⌘K</span>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:9px;flex:none">
+      <button onClick="{{ toggleRecord }}" style="display:flex;align-items:center;gap:8px;height:30px;padding:0 13px;border-radius:8px;border:1px solid var(--line);background:{{ recBg }};color:{{ recFg }};font:700 11.5px Manrope,sans-serif;letter-spacing:.02em">
+        <span style="width:8px;height:8px;border-radius:50%;background:{{ recDot }};animation:{{ recAnim }};display:block"></span>
+        {{ recLabel }}
+      </button>
+      <sc-if value="{{ narrow }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ toggleRail }}" style="display:flex;align-items:center;gap:7px;height:30px;padding:0 12px;border-radius:8px;border:1px solid var(--line);background:{{ railBtnBg }};color:{{ railBtnFg }};font:700 11.5px Manrope,sans-serif">
+          <span style="width:7px;height:7px;border-radius:50%;background:linear-gradient(90deg,#4192B9,#5AC3A7);display:block"></span>Ask
+        </button>
+      </sc-if>
+      <button onClick="{{ toggleTheme }}" title="Appearance" style="width:30px;height:30px;display:grid;place-items:center;border-radius:8px;border:1px solid var(--line);background:var(--panel3);color:var(--ink2);font-size:12px">{{ themeIcon }}</button>
+    </div>
+  </div>
+
+  <!-- body -->
+  <div style="flex:1;display:flex;min-height:0">
+
+    <!-- sidebar -->
+    <div style="flex:none;width:{{ sideW }};display:flex;flex-direction:column;background:var(--panel2);border-right:1px solid var(--line);padding:16px 12px 12px;overflow:auto">
+      <div style="padding:0 6px 16px;display:{{ showLabels }}">
+        <div style="font:500 21px/1 Poppins,sans-serif;letter-spacing:.02em;background:linear-gradient(90deg,#4192B9,#5AC3A7);-webkit-background-clip:text;background-clip:text;color:transparent">maverio</div>
+        <div style="font:700 9px Manrope,sans-serif;letter-spacing:.34em;color:var(--ink3);margin-top:5px">RECALL</div>
+      </div>
+      <sc-if value="{{ collapsed }}" hint-placeholder-val="{{ false }}">
+        <div style="display:grid;place-items:center;padding:0 0 16px">
+          <span style="width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,#4192B9,#5AC3A7);display:block"></span>
+        </div>
+      </sc-if>
+
+      <div style="display:flex;flex-direction:column;gap:2px">
+        <sc-for list="{{ nav }}" as="n" hint-placeholder-count="4">
+          <button onClick="{{ n.go }}" title="{{ n.label }}" style="display:flex;align-items:center;gap:9px;width:100%;padding:8px 9px;border-radius:8px;border:0;text-align:left;justify-content:{{ navJustify }};background:{{ n.bg }};color:{{ n.fg }};font:600 12.5px Manrope,sans-serif" style-hover="background:var(--panel3)">
+            <span style="width:16px;text-align:center;font-size:12px;opacity:.9;flex:none">{{ n.icon }}</span>
+            <span style="flex:1;display:{{ showLabels }}">{{ n.label }}</span>
+            <sc-if value="{{ n.badge }}" hint-placeholder-val="{{ true }}">
+              <span style="font:700 9.5px Manrope,sans-serif;padding:2px 6px;border-radius:20px;background:#FF6A00;color:#fff;flex:none">{{ n.badge }}</span>
+            </sc-if>
+          </button>
+        </sc-for>
+      </div>
+
+      <div style="align-items:baseline;justify-content:space-between;gap:8px;padding:22px 9px 9px;display:{{ clientsDisplay }}">
+        <span style="font:700 9px Manrope,sans-serif;letter-spacing:.28em;color:var(--ink3)">CLIENTS · ACTIVE</span>
+        <span style="font:600 9.5px Manrope,sans-serif;color:var(--ink3)">{{ activeCount }}</span>
+      </div>
+      <div style="display:{{ clientsDisplay }};flex-direction:column;gap:1px;flex:none">
+        <sc-for list="{{ clientsActive }}" as="c" hint-placeholder-count="5">
+          <div style="display:flex;align-items:center;gap:2px;border-radius:7px;background:{{ c.bg }}">
+            <button onClick="{{ c.pick }}" style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;padding:7px 4px 7px 9px;border-radius:7px;border:0;text-align:left;background:transparent;font:600 12px Manrope,sans-serif;color:{{ c.fg }}">
+              <span style="width:6px;height:6px;border-radius:50%;background:{{ c.dot }};flex:none;display:block"></span>
+              <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ c.name }}</span>
+            </button>
+            <button onClick="{{ c.toggleArchive }}" title="Archive {{ c.name }}" style="width:22px;height:26px;border:0;background:transparent;color:var(--ink3);font:600 12px Manrope,sans-serif;flex:none;border-radius:6px" style-hover="background:var(--panel3);color:var(--ink)">–</button>
+          </div>
+        </sc-for>
+        <sc-if value="{{ noActiveClients }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:8px 9px;font:500 11px Manrope,sans-serif;color:var(--ink3)">Everything is archived.</div>
+        </sc-if>
+      </div>
+
+      <button onClick="{{ toggleArchive }}" style="display:{{ clientsDisplay }};align-items:baseline;justify-content:space-between;gap:8px;width:100%;padding:18px 9px 9px;border:0;background:transparent;text-align:left">
+        <span style="font:700 9px Manrope,sans-serif;letter-spacing:.28em;color:var(--ink3)">ARCHIVED</span>
+        <span style="display:flex;align-items:center;gap:6px">
+          <span style="font:600 9.5px Manrope,sans-serif;color:var(--ink3)">{{ archivedCount }}</span>
+          <span style="font-size:9px;color:var(--ink3);display:inline-block;transform:rotate({{ archiveChevron }})">▾</span>
+        </span>
+      </button>
+      <div style="display:{{ archiveListDisplay }};flex-direction:column;gap:1px;flex:none">
+        <sc-for list="{{ clientsArchived }}" as="c" hint-placeholder-count="2">
+          <div style="display:flex;align-items:center;gap:2px;border-radius:7px;background:{{ c.bg }};opacity:.72">
+            <button onClick="{{ c.pick }}" style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;padding:7px 4px 7px 9px;border-radius:7px;border:0;text-align:left;background:transparent;font:500 12px Manrope,sans-serif;color:{{ c.fg }}">
+              <span style="width:6px;height:6px;border-radius:50%;background:var(--ink3);flex:none;display:block"></span>
+              <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ c.name }}</span>
+            </button>
+            <button onClick="{{ c.toggleArchive }}" title="Restore {{ c.name }} to active" style="width:22px;height:26px;border:0;background:transparent;color:var(--ink3);font:600 12px Manrope,sans-serif;flex:none;border-radius:6px" style-hover="background:var(--panel3);color:var(--ink)">+</button>
+          </div>
+        </sc-for>
+        <sc-if value="{{ noArchivedClients }}" hint-placeholder-val="{{ true }}">
+          <div style="padding:8px 9px;font:500 11px Manrope,sans-serif;color:var(--ink3);text-wrap:pretty">Nothing archived. Use – to move a finished client out of the active list.</div>
+        </sc-if>
+      </div>
+
+      <button onClick="{{ toggleAccountMenu }}" title="Account, settings and appearance" style="border:0;border-top:1px solid var(--line);margin-top:auto;padding:14px 7px 6px;display:flex;align-items:center;gap:9px;flex:none;background:transparent;width:100%;text-align:left">
+        <div style="width:26px;height:26px;border-radius:50%;background:{{ meAvatarBg }};color:#fff;display:grid;place-items:center;font:700 10px Manrope,sans-serif;flex:none">{{ meIni }}</div>
+        <div style="min-width:0;flex:1;display:{{ showLabels }}">
+          <div style="font:700 11.5px Manrope,sans-serif;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ meName }}</div>
+          <div style="font:600 9.5px Manrope,sans-serif;color:{{ meRoleColor }}">{{ meRole }}</div>
+        </div>
+      </button>
+    </div>
+
+    <!-- main column -->
+    <div style="flex:1;display:flex;min-width:0">
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;overflow:auto;background:var(--panel)">
+
+        <!-- ============ TIMELINE ============ -->
+        <sc-if value="{{ isLibrary }}" hint-placeholder-val="{{ true }}">
+        <div style="padding:26px 28px 40px">
+          <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px">
+            <div>
+              <h1 style="font:600 27px/1.15 Poppins,sans-serif;color:var(--ink);margin:0 0 5px;letter-spacing:-.01em">Timeline</h1>
+              <div style="font:500 12.5px Manrope,sans-serif;color:var(--ink2)">{{ resultLine }}</div>
+            </div>
+            <div style="display:flex;gap:7px;flex-wrap:wrap">
+              <sc-for list="{{ practices }}" as="p" hint-placeholder-count="4">
+                <button onClick="{{ p.pick }}" style="height:29px;padding:0 12px;border-radius:20px;border:1px solid {{ p.border }};background:{{ p.bg }};color:{{ p.fg }};font:700 11px Manrope,sans-serif;letter-spacing:.01em;display:flex;align-items:center;gap:7px">
+                  <span style="width:7px;height:7px;border-radius:50%;background:{{ p.dot }};display:block"></span>{{ p.label }}
+                </button>
+              </sc-for>
+            </div>
+          </div>
+
+          <sc-if value="{{ filterActive }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ clearFilters }}" style="margin-bottom:14px;height:26px;padding:0 11px;border-radius:7px;border:1px dashed var(--line);background:transparent;color:var(--ink2);font:600 11px Manrope,sans-serif">Clear filters ✕</button>
+          </sc-if>
+
+          <div style="display:flex;flex-direction:column;gap:9px">
+            <sc-for list="{{ shownMeetings }}" as="m" hint-placeholder-count="6">
+              <div onClick="{{ m.open }}" style="display:grid;grid-template-columns:58px minmax(0,1fr) auto;gap:16px;align-items:center;padding:14px 16px;border:1px solid {{ m.border }};border-radius:11px;background:{{ m.bg }};box-shadow:{{ m.glow }};cursor:pointer" style-hover="border-color:var(--aqua1);background:var(--tint)">
+                <div style="text-align:center">
+                  <div style="font:700 9.5px Manrope,sans-serif;color:var(--ink3);letter-spacing:.12em">{{ m.dow }}</div>
+                  <div style="font:600 19px/1.1 Poppins,sans-serif;color:var(--ink)">{{ m.day }}</div>
+                  <div style="font:600 9.5px Manrope,sans-serif;color:var(--ink3);letter-spacing:.1em">{{ m.mon }}</div>
+                </div>
+                <div style="min-width:0">
+                  <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:5px">
+                    <span style="font:700 14.5px Manrope,sans-serif;color:var(--ink)">{{ m.title }}</span>
+                    <span style="font:700 9.5px Manrope,sans-serif;letter-spacing:.06em;padding:2.5px 7px;border-radius:5px;background:{{ m.pTint }};color:{{ m.pColor }}">{{ m.practice }}</span>
+                    <span style="font:700 9.5px Manrope,sans-serif;letter-spacing:.08em;padding:2.5px 8px;border-radius:5px;background:linear-gradient(90deg,#4192B9,#5AC3A7);color:#fff;display:{{ m.freshDisplay }}">{{ m.freshLabel }}</span>
+                  </div>
+                  <div style="font:500 12px Manrope,sans-serif;color:var(--ink2);margin-bottom:8px">{{ m.client }} · {{ m.dur }} · {{ m.stats }}</div>
+                  <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+                    <sc-for list="{{ m.people }}" as="p" hint-placeholder-count="3">
+                      <span style="display:flex;align-items:center;gap:5px;height:21px;padding:0 8px 0 3px;border-radius:20px;background:var(--panel2);font:600 10.5px Manrope,sans-serif;color:var(--ink2)">
+                        <span style="width:16px;height:16px;border-radius:50%;background:{{ p.color }};color:#fff;display:grid;place-items:center;font:700 7.5px Manrope,sans-serif">{{ p.ini }}</span>{{ p.name }}
+                      </span>
+                    </sc-for>
+                  </div>
+                </div>
+                <div style="text-align:right;display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+                  <sc-if value="{{ m.unknown }}" hint-placeholder-val="{{ false }}">
+                    <span style="font:700 10px Manrope,sans-serif;color:#FF6A00;background:rgba(255,106,0,.11);padding:3px 8px;border-radius:5px">{{ m.unknownLabel }}</span>
+                  </sc-if>
+                  <span style="font:600 11px Manrope,sans-serif;color:var(--ink3)">{{ m.time }}</span>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        </sc-if>
+
+        <!-- ============ SEARCH ============ -->
+        <sc-if value="{{ isSearch }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:26px 28px 40px">
+          <div style="font:700 9px Manrope,sans-serif;letter-spacing:.28em;color:var(--ink3);margin-bottom:8px">SEARCH</div>
+          <h1 style="font:600 25px/1.2 Poppins,sans-serif;color:var(--ink);margin:0 0 6px">{{ searchHeading }}</h1>
+          <div style="font:500 12.5px Manrope,sans-serif;color:var(--ink2);margin-bottom:20px">{{ searchSub }}</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <sc-for list="{{ searchResults }}" as="r" hint-placeholder-count="4">
+              <div onClick="{{ r.open }}" style="padding:13px 15px;border:1px solid var(--line);border-radius:10px;background:var(--panel);cursor:pointer" style-hover="border-color:var(--aqua1);background:var(--tint)">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;flex-wrap:wrap">
+                  <span style="width:18px;height:18px;border-radius:50%;background:{{ r.color }};color:#fff;display:grid;place-items:center;font:700 8px Manrope,sans-serif">{{ r.ini }}</span>
+                  <span style="font:700 12px Manrope,sans-serif;color:var(--ink)">{{ r.who }}</span>
+                  <span style="font:500 11px JetBrains Mono,monospace;color:var(--ink3)">{{ r.at }}</span>
+                  <span style="font:600 11px Manrope,sans-serif;color:var(--ink3)">· {{ r.meeting }}</span>
+                </div>
+                <div style="font:500 13px/1.6 Manrope,sans-serif;color:var(--ink2)">{{ r.pre }}<mark style="background:rgba(90,195,167,.28);color:var(--ink);border-radius:3px;padding:0 2px;font-weight:700">{{ r.hit }}</mark>{{ r.post }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <sc-if value="{{ noResults }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:34px;border:1px dashed var(--line);border-radius:11px;text-align:center;font:500 13px Manrope,sans-serif;color:var(--ink2)">Nothing matched. Try a client name, a decision, or a person.</div>
+          </sc-if>
+        </div>
+        </sc-if>
+
+        <!-- ============ MEETING DETAIL ============ -->
+        <sc-if value="{{ isMeeting }}" hint-placeholder-val="{{ false }}">
+        <div>
+          <div style="padding:22px 28px 0">
+            <button onClick="{{ backToLibrary }}" style="border:0;background:transparent;padding:0;font:600 11.5px Manrope,sans-serif;color:var(--ink2);margin-bottom:14px">← Timeline</button>
+            <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:7px">
+              <span style="font:700 9.5px Manrope,sans-serif;letter-spacing:.06em;padding:3px 8px;border-radius:5px;background:{{ cur.pTint }};color:{{ cur.pColor }}">{{ cur.practice }}</span>
+              <span style="font:600 11.5px Manrope,sans-serif;color:var(--ink3)">{{ cur.client }}</span>
+            </div>
+            <sc-if value="{{ notEditingTitle }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;align-items:center;gap:10px;margin:0 0 7px;flex-wrap:wrap">
+                <h1 style="font:600 26px/1.2 Poppins,sans-serif;color:var(--ink);margin:0;letter-spacing:-.01em">{{ cur.title }}</h1>
+                <button onClick="{{ startEditTitle }}" title="Rename this meeting" style="display:flex;align-items:center;gap:6px;height:28px;padding:0 11px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--ink2);font:700 11px Manrope,sans-serif">
+                  <span style="font-size:11px;line-height:1">✎</span>Edit
+                </button>
+                <sc-if value="{{ titleEdited }}" hint-placeholder-val="{{ false }}">
+                  <span style="font:600 10px Manrope,sans-serif;letter-spacing:.1em;color:var(--ink3);background:var(--panel3);padding:3px 8px;border-radius:5px">RENAMED BY YOU</span>
+                </sc-if>
+              </div>
+            </sc-if>
+            <sc-if value="{{ editingTitle }}" hint-placeholder-val="{{ false }}">
+              <form onSubmit="{{ saveTitle }}" style="display:flex;gap:8px;align-items:center;margin:0 0 7px;flex-wrap:wrap">
+                <input value="{{ titleDraft }}" onChange="{{ onTitleDraft }}" autoFocus="{{ true }}" style="flex:1;min-width:240px;height:42px;padding:0 13px;border-radius:10px;border:1px solid var(--line2);background:var(--panel);color:var(--ink);font:600 20px Poppins,sans-serif" />
+                <button type="submit" style="height:38px;padding:0 15px;border-radius:9px;border:0;background:linear-gradient(90deg,#4192B9,#5AC3A7);color:#fff;font:700 12px Manrope,sans-serif">Save</button>
+                <button type="button" onClick="{{ cancelEditTitle }}" style="height:38px;padding:0 13px;border-radius:9px;border:1px solid var(--line);background:var(--panel2);color:var(--ink2);font:700 12px Manrope,sans-serif">Cancel</button>
+              </form>
+            </sc-if>
+            <div style="font:500 12.5px Manrope,sans-serif;color:var(--ink2)">{{ cur.metaLine }}</div>
+            <sc-if value="{{ analysing }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:16px;padding:13px 16px;border:1px solid var(--line2);border-radius:11px;background:var(--tint);display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+                <span style="display:flex;align-items:center;gap:7px;font:700 10px Manrope,sans-serif;letter-spacing:.14em;color:#27AC53"><span style="width:7px;height:7px;border-radius:50%;background:#27AC53;display:block"></span>TRANSCRIPT COMPLETE</span>
+                <span style="flex:1;min-width:220px;font:500 12.5px/1.6 Manrope,sans-serif;color:var(--ink2)">Speakers are separated and the full transcript is readable now. Decisions, actions and extracted fields are still being analysed and will fill in on the Summary tab.</span>
+              </div>
+            </sc-if>
+            <div style="display:flex;gap:3px;margin-top:18px;border-bottom:1px solid var(--line)">
+              <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="3">
+                <button onClick="{{ t.go }}" style="padding:9px 14px;border:0;background:transparent;border-bottom:2px solid {{ t.line }};color:{{ t.fg }};font:700 12px Manrope,sans-serif;margin-bottom:-1px">{{ t.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+
+          <sc-if value="{{ tabSummary }}" hint-placeholder-val="{{ true }}">
+          <div style="padding:22px 28px 40px;display:flex;flex-direction:column;gap:22px">
+            <div style="padding:18px 20px;border-radius:12px;background:var(--tint);border:1px solid var(--line2)">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:11px">
+                <span style="font:700 9px Manrope,sans-serif;letter-spacing:.26em;color:var(--ink3)">KEY OBJECTIVE</span>
+                <span style="font:500 10.5px JetBrains Mono,monospace;color:var(--ink3)">{{ objectiveCite }}</span>
+              </div>
+              <div style="font:700 18px/1.4 Poppins,sans-serif;color:var(--ink);text-wrap:pretty">{{ objective }}</div>
+              <div style="height:1px;background:var(--line2);margin:16px 0 14px"></div>
+              <div style="font:700 9px Manrope,sans-serif;letter-spacing:.26em;color:var(--ink3);margin-bottom:9px">AI SUMMARY · FROM THE RECORDING ONLY</div>
+              <sc-if value="{{ analysing }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:9px;font:700 10px Manrope,sans-serif;letter-spacing:.14em;color:#FF6A00"><span style="width:7px;height:7px;border-radius:50%;background:#FF6A00;display:block"></span>ANALYSING · TRANSCRIPT ALREADY DONE</div>
+              </sc-if>
+              <div style="font:500 14px/1.65 Manrope,sans-serif;color:var(--ink);text-wrap:pretty">{{ cur.summary }}</div>
+              <div style="margin-top:12px;font:500 11.5px/1.6 Manrope,sans-serif;color:var(--ink3);text-wrap:pretty">Written only from what was said. Nothing is inferred to fill a gap — anything missing is listed as a question below.</div>
+            </div>
+
+            <div>
+              <div style="font:700 9px Manrope,sans-serif;letter-spacing:.26em;color:var(--ink3);margin-bottom:10px">DECISIONS</div>
+              <div style="display:flex;flex-direction:column;gap:7px">
+                <sc-for list="{{ cur.decisions }}" as="d" hint-placeholder-count="3">
+                  <div style="display:flex;gap:11px;padding:12px 14px;border:1px solid var(--line);border-radius:9px">
+                    <span style="width:5px;border-radius:3px;background:linear-gradient(180deg,#4192B9,#5AC3A7);flex:none;display:block"></span>
+                    <div style="min-width:0">
+                      <div style="font:600 13.5px/1.5 Manrope,sans-serif;color:var(--ink)">{{ d.text }}</div>
+                      <div style="font:500 11px JetBrains Mono,monospace;color:var(--ink3);margin-top:5px">{{ d.cite }}</div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+
+            <div>
+              <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px">
+                <span style="font:700 9px Manrope,sans-serif;letter-spacing:.26em;color:var(--ink3)">ACTIONS</span>
+                <span style="font:600 10.5px Manrope,sans-serif;color:var(--ink3)">{{ actionCount }} · each traced to a line in the recording</span>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:7px">
+                <sc-for list="{{ cur.actions }}" as="a" hint-placeholder-count="3">
+                  <div style="display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:13px;align-items:start;padding:13px 15px;border:1px solid var(--line);border-radius:10px">
+                    <span style="display:flex;flex-direction:column;align-items:center;gap:6px">
+                      <span style="font:700 10px JetBrains Mono,monospace;color:var(--ink3)">{{ a.n }}</span>
+                      <span style="width:24px;height:24px;border-radius:50%;background:{{ a.color }};color:#fff;display:grid;place-items:center;font:700 8.5px Manrope,sans-serif">{{ a.ini }}</span>
+                    </span>
+                    <span style="min-width:0">
+                      <span style="display:block;font:600 13.5px/1.45 Manrope,sans-serif;color:var(--ink)">{{ a.text }}</span>
+                      <span style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:6px">
+                        <span style="font:600 11px Manrope,sans-serif;color:var(--ink2)">{{ a.who }}</span>
+                        <span style="font:500 10.5px JetBrains Mono,monospace;color:var(--ink3)">{{ a.srcLabel }}</span>
+                      </span>
+                    </span>
+                    <span style="font:700 10.5px Manrope,sans-serif;color:{{ a.dueFg }};background:{{ a.dueBg }};padding:5px 9px;border-radius:6px;white-space:nowrap">{{ a.due }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+
+            <sc-if value="{{ hasGaps }}" hint-placeholder-val="{{ true }}">
+            <div>
+              <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px">
+                <span style="font:700 9px Manrope,sans-serif;letter-spacing:.26em;color:#FF6A00">QUESTIONS FOR YOU</span>
+                <span style="font:600 10.5px Manrope,sans-serif;color:var(--ink3)">{{ gapCount }} · not said on the recording, so not answered here</span>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <sc-for list="{{ gaps }}" as="g" hint-placeholder-count="2">
+                  <div style="padding:14px 16px;border:1px solid rgba(255,106,0,.35);border-radius:10px;background:rgba(255,106,0,.05)">
+                    <div style="display:flex;gap:11px;align-items:baseline">
+                      <span style="font:700 10px JetBrains Mono,monospace;color:#FF6A00">{{ g.n }}</span>
+                      <div style="min-width:0;flex:1">
+                        <div style="font:600 13.5px/1.45 Manrope,sans-serif;color:var(--ink)">{{ g.q }}</div>
+                        <div style="font:500 11.5px/1.6 Manrope,sans-serif;color:var(--ink2);margin-top:5px">{{ g.why }}</div>
+                        <div style="font:500 10.5px JetBrains Mono,monospace;color:var(--ink3);margin-top:5px">{{ g.citeLabel }}</div>
+                        <sc-if value="{{ g.unanswered }}" hint-placeholder-val="{{ true }}">
+                          <form onSubmit="{{ g.submit }}" style="display:flex;gap:7px;margin-top:11px">
+                            <input value="{{ g.draft }}" onChange="{{ g.onDraft }}" placeholder="Answer it and Recall records your answer, not a guess" style="flex:1;min-width:0;height:32px;padding:0 11px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font:500 12px Manrope,sans-serif" />
+                            <button type="submit" style="height:32px;padding:0 13px;border-radius:8px;border:0;background:linear-gradient(90deg,#4192B9,#5AC3A7);color:#fff;font:700 11px Manrope,sans-serif">Save</button>
+                          </form>
+                        </sc-if>
+                        <sc-if value="{{ g.answered }}" hint-placeholder-val="{{ false }}">
+                          <div style="margin-top:11px;padding:10px 12px;border-radius:8px;background:var(--panel);border:1px solid var(--line)">
+                            <div style="font:700 9px Manrope,sans-serif;letter-spacing:.2em;color:#27AC53;margin-bottom:5px">ANSWERED BY YOU · LANA MAROV</div>
+                            <div style="font:600 12.5px/1.5 Manrope,sans-serif;color:var(--ink)">{{ g.answer }}</div>
+                          </div>
+                        </sc-if>
+                      </div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            </sc-if>
+
+            <div>
+              <button onClick="{{ toggleFields }}" style="display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;margin-bottom:10px;padding:0;border:0;background:transparent;text-align:left">
+                <span style="display:flex;align-items:center;gap:9px">
+                  <span style="font:700 9px Manrope,sans-serif;letter-spacing:.26em;color:var(--ink3)">EXTRACTED FIELDS</span>
+                  <span style="font:600 9.5px Manrope,sans-serif;color:var(--ink2);background:var(--panel3);padding:2.5px 7px;border-radius:5px">{{ fieldsCount }}</span>
+                </span>
+                <span style="display:flex;align-items:center;gap:8px">
+                  <span style="font:600 10.5px Manrope,sans-serif;color:var(--ink3)">{{ fieldsHint }}</span>
+                  <span style="font-size:10px;color:var(--ink3);transform:rotate({{ fieldsChevron }});transition:transform .15s ease;display:inline-block">▾</span>
+                </span>
+              </button>
+              <sc-if value="{{ fieldSyncOn }}" hint-placeholder-val="{{ false }}">
+                <button onClick="{{ goClientFromField }}" style="display:flex;align-items:center;gap:9px;width:100%;margin-bottom:9px;padding:10px 13px;border-radius:9px;border:1px solid rgba(39,172,83,.4);background:rgba(39,172,83,.08);text-align:left">
+                  <span style="width:7px;height:7px;border-radius:50%;background:#27AC53;flex:none;display:block"></span>
+                  <span style="flex:1;font:600 11.5px Manrope,sans-serif;color:var(--ink)">{{ fieldSyncLabel }}</span>
+                  <span style="font:700 10.5px Manrope,sans-serif;color:#27AC53;white-space:nowrap">Open profile →</span>
+                </button>
+              </sc-if>
+              <div style="border:1px solid var(--line);border-radius:10px;overflow:hidden;display:{{ fieldsDisplay }}">
+                <sc-for list="{{ cur.fields }}" as="f" hint-placeholder-count="5">
+                  <div style="display:grid;grid-template-columns:168px minmax(0,1fr) auto;gap:14px;align-items:center;padding:11px 15px;border-bottom:1px solid var(--line2);background:{{ f.bg }}">
+                    <span style="font:600 11px JetBrains Mono,monospace;color:var(--ink3)">{{ f.key }}</span>
+                    <sc-if value="{{ f.reading }}" hint-placeholder-val="{{ true }}">
+                      <span style="min-width:0;display:flex;align-items:center;gap:9px;flex-wrap:wrap">
+                        <span style="font:600 12.5px/1.5 Manrope,sans-serif;color:var(--ink)">{{ f.val }}</span>
+                        <sc-if value="{{ f.edited }}" hint-placeholder-val="{{ false }}">
+                          <span style="font:700 9px Manrope,sans-serif;letter-spacing:.14em;color:#27AC53;background:rgba(39,172,83,.12);padding:2.5px 7px;border-radius:5px;white-space:nowrap">EDITED BY YOU</span>
+                        </sc-if>
+                      </span>
+                      <button onClick="{{ f.start }}" title="Change this value" style="height:26px;padding:0 10px;border-radius:7px;border:1px solid var(--line);background:var(--panel2);color:var(--ink2);font:700 10.5px Manrope,sans-serif;white-space:nowrap">✎ Edit</button>
+                    </sc-if>
+                    <sc-if value="{{ f.editing }}" hint-placeholder-val="{{ false }}">
+                      <form onSubmit="{{ f.save }}" style="display:flex;gap:7px;min-width:0">
+                        <input value="{{ f.draft }}" onChange="{{ f.onDraft }}" autoFocus="{{ true }}" style="flex:1;min-width:0;height:30px;padding:0 10px;border-radius:7px;border:1px solid var(--line2);background:var(--panel);color:var(--ink);font:600 12.5px Manrope,sans-serif" />
+                      </form>
+                      <span style="display:flex;gap:6px">
+                        <button onClick="{{ f.save }}" style="height:26px;padding:0 11px;border-radius:7px;border:0;background:linear-gradient(90deg,#4192B9,#5AC3A7);color:#fff;font:700 10.5px Manrope,sans-serif">Save</button>
+                        <button onClick="{{ f.cancel }}" style="height:26px;padding:0 10px;border-radius:7px;border:1px solid var(--line);background:var(--panel2);color:var(--ink2);font:700 10.5px Manrope,sans-serif">Cancel</button>
+                      </span>
+                    </sc-if>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+          </sc-if>
+
+          <sc-if value="{{ tabTranscript }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:20px 28px 40px">
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px">
+              <span style="font:600 11.5px Manrope,sans-serif;color:var(--ink2)">{{ cur.diarLine }}</span>
+              <span style="font:500 11px Manrope,sans-serif;color:var(--ink3)">AI transcript · verbatim, no cleanup or paraphrase</span>
+              <sc-if value="{{ cur.hasUnknown }}" hint-placeholder-val="{{ false }}">
+                <button onClick="{{ openNamer }}" style="height:27px;padding:0 11px;border-radius:7px;border:1px solid #FF6A00;background:rgba(255,106,0,.10);color:#FF6A00;font:700 11px Manrope,sans-serif">Name unrecognised voice</button>
+              </sc-if>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:2px;max-width:760px">
+              <sc-for list="{{ cur.lines }}" as="l" hint-placeholder-count="8">
+                <div style="display:grid;grid-template-columns:56px minmax(0,1fr);gap:14px;align-items:start;padding:12px 0 14px;border-top:1px solid {{ l.divider }}">
+                  <span style="font:500 11px JetBrains Mono,monospace;color:var(--ink3);padding-top:3px">{{ l.t }}</span>
+                  <div style="min-width:0">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;display:{{ l.nameDisplay }}">
+                      <span style="width:22px;height:22px;border-radius:50%;background:{{ l.color }};color:#fff;display:grid;place-items:center;font:700 8.5px Manrope,sans-serif;flex:none">{{ l.ini }}</span>
+                      <span style="font:800 12.5px Manrope,sans-serif;color:{{ l.nameColor }};letter-spacing:.005em">{{ l.who }}</span>
+                      <span style="font:600 9.5px Manrope,sans-serif;color:#FF6A00;background:rgba(255,106,0,.11);padding:2px 6px;border-radius:4px;display:{{ l.confDisplay }}">{{ l.conf }}</span>
+                    </div>
+                    <div style="font:500 14px/1.8 Manrope,sans-serif;color:var(--ink);opacity:.86;text-wrap:pretty">{{ l.text }}</div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          </sc-if>
+
+          <sc-if value="{{ tabExport }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:22px 28px 40px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px">
+              <div style="font:500 12.5px/1.6 Manrope,sans-serif;color:var(--ink2);max-width:560px">This is the exact markdown handed to the Maverio LLM pipeline. One file per meeting, front-matter carries the structured fields.</div>
+              <div style="display:flex;gap:8px">
+                <button onClick="{{ toggleRedact }}" style="height:30px;padding:0 12px;border-radius:8px;border:1px solid var(--line);background:{{ redactBg }};color:{{ redactFg }};font:700 11px Manrope,sans-serif">{{ redactLabel }}</button>
+                <button onClick="{{ toggleRedactNames }}" style="height:30px;padding:0 12px;border-radius:8px;border:1px solid var(--line);background:{{ redactNamesBg }};color:{{ redactNamesFg }};font:700 11px Manrope,sans-serif">{{ redactNamesLabel }}</button>
+                <button onClick="{{ copyMd }}" style="height:30px;padding:0 14px;border-radius:8px;border:0;background:linear-gradient(90deg,#4192B9,#5AC3A7);color:#fff;font:700 11px Manrope,sans-serif">{{ copyLabel }}</button>
+              </div>
+            </div>
+            <pre style="margin:0;padding:18px;border-radius:11px;background:var(--panel2);border:1px solid var(--line);font:400 11.5px/1.85 JetBrains Mono,monospace;color:var(--ink);white-space:pre-wrap;word-break:break-word">{{ cur.markdown }}</pre>
+          </div>
+          </sc-if>
+        </div>
+        </sc-if>
+
+        <!-- ============ VOICES ============ -->
+        <sc-if value="{{ isVoices }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:26px 28px 40px">
+          <h1 style="font:600 27px/1.15 Poppins,sans-serif;color:var(--ink);margin:0 0 5px;letter-spacing:-.01em">Voices</h1>
+          <div style="font:500 12.5px Manrope,sans-serif;color:var(--ink2);margin-bottom:24px">{{ voiceSub }}</div>
+
+          <sc-if value="{{ hasPending }}" hint-placeholder-val="{{ true }}">
+          <div style="margin-bottom:30px">
+            <div style="font:700 9px Manrope,sans-serif;letter-spacing:.26em;color:#FF6A00;margin-bottom:11px">NEEDS A NAME</div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(258px,1fr));gap:11px">
+              <sc-for list="{{ pending }}" as="v" hint-placeholder-count="3">
+                <div style="padding:15px;border:1px solid rgba(255,106,0,.35);border-radius:11px;background:rgba(255,106,0,.05)">
+                  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+                    <button onClick="{{ v.play }}" title="{{ v.playTitle }}" style="width:34px;height:34px;border-radius:50%;border:1px solid {{ v.playBorder }};background:{{ v.playBg }};color:{{ v.playFg }};display:grid;place-items:center;font-size:11px;padding:0 0 0 {{ v.playPad }};flex:none" style-hover="border-color:#4192B9">{{ v.playIcon }}</button>
+                    <div style="min-width:0">
+                      <div style="font:700 13px Manrope,sans-serif;color:var(--ink)">{{ v.label }}</div>
+                      <div style="font:600 10.5px Manrope,sans-serif;color:var(--ink3)">{{ v.meta }}</div>
+                    </div>
+                  </div>
+                  <div onClick="{{ v.play }}" style="display:flex;align-items:flex-end;gap:2px;height:30px;margin-bottom:8px;cursor:pointer">
+                    <sc-for list="{{ v.wave }}" as="w" hint-placeholder-count="26">
+                      <span style="flex:1;height:{{ w.h }};background:linear-gradient(180deg,#4192B9,#5AC3A7);border-radius:2px;opacity:{{ w.op }};transform-origin:bottom;animation:{{ w.anim }};display:block"></span>
+                    </sc-for>
+                  </div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px">
+                    <span style="font:500 10.5px JetBrains Mono,monospace;color:var(--ink3)">{{ v.clip }}</span>
+                    <span style="font:600 10.5px Manrope,sans-serif;color:#4192B9">{{ v.playState }}</span>
+                  </div>
+                  <div style="font:500 11.5px/1.55 Manrope,sans-serif;color:var(--ink2);margin-bottom:12px">{{ v.hint }}</div>
+                  <div style="display:flex;gap:7px">
+                    <button onClick="{{ v.name }}" style="flex:1;height:30px;border-radius:8px;border:0;background:linear-gradient(90deg,#4192B9,#5AC3A7);color:#fff;font:700 11px Manrope,sans-serif">Name voice</button>
+                    <button onClick="{{ v.merge }}" style="height:30px;padding:0 11px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--ink2);font:700 11px Manrope,sans-serif">Not a person</button>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          </sc-if>
+
+          <div style="font:700 9px Manrope,sans-serif;letter-spacing:.26em;color:var(--ink3);margin-bottom:11px">KNOWN VOICES</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(228px,1fr));gap:10px">
+            <sc-for list="{{ known }}" as="v" hint-placeholder-count="6">
+              <div style="padding:13px 14px;border:1px solid var(--line);border-radius:11px;display:flex;gap:11px;align-items:center">
+                <div style="width:34px;height:34px;border-radius:50%;background:{{ v.color }};color:#fff;display:grid;place-items:center;font:700 11px Manrope,sans-serif;flex:none">{{ v.ini }}</div>
+                <div style="min-width:0;flex:1">
+                  <div style="font:700 13px Manrope,sans-serif;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ v.name }}</div>
+                  <div style="font:600 10.5px Manrope,sans-serif;color:var(--ink3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ v.meta }}</div>
+                </div>
+                <span style="font:700 9.5px Manrope,sans-serif;color:var(--ink3);border:1px solid var(--line);padding:2px 6px;border-radius:4px;flex:none">{{ v.match }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        </sc-if>
+
+        <!-- ============ EXPORT ============ -->
+        <sc-if value="{{ isExport }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:26px 28px 40px">
+          <h1 style="font:600 27px/1.15 Poppins,sans-serif;color:var(--ink);margin:0 0 5px;letter-spacing:-.01em">Company knowledge base</h1>
+          <div style="font:500 12.5px/1.6 Manrope,sans-serif;color:var(--ink2);max-width:620px;margin-bottom:22px">Everything Recall captures becomes one markdown file per meeting, with structured front-matter. This is the corpus your in-house model trains on.</div>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:10px;margin-bottom:26px">
+            <sc-for list="{{ stats }}" as="s" hint-placeholder-count="4">
+              <div style="padding:15px;border:1px solid var(--line);border-radius:11px;background:var(--panel2)">
+                <div style="font:600 25px/1 Poppins,sans-serif;color:var(--ink);margin-bottom:6px">{{ s.n }}</div>
+                <div style="font:600 10.5px Manrope,sans-serif;color:var(--ink3);letter-spacing:.04em">{{ s.label }}</div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="font:700 9px Manrope,sans-serif;letter-spacing:.26em;color:var(--ink3);margin-bottom:11px">CORPUS</div>
+          <div style="border:1px solid var(--line);border-radius:11px;overflow:hidden">
+            <sc-for list="{{ corpus }}" as="c" hint-placeholder-count="6">
+              <div onClick="{{ c.open }}" style="display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:14px;align-items:center;padding:12px 15px;border-bottom:1px solid var(--line2);cursor:pointer;background:var(--panel)" style-hover="background:var(--tint)">
+                <div style="min-width:0">
+                  <div style="font:600 12px JetBrains Mono,monospace;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ c.file }}</div>
+                  <div style="font:600 10.5px Manrope,sans-serif;color:var(--ink3);margin-top:4px">{{ c.meta }}</div>
+                </div>
+                <span style="font:700 9.5px Manrope,sans-serif;letter-spacing:.05em;padding:3px 7px;border-radius:5px;background:{{ c.pTint }};color:{{ c.pColor }}">{{ c.practice }}</span>
+                <span style="font:600 11px Manrope,sans-serif;color:var(--ink3);white-space:nowrap">{{ c.size }}</span>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="margin-top:18px;padding:15px 17px;border:1px dashed var(--line);border-radius:11px;display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+            <div style="flex:1;min-width:220px;font:500 12px/1.6 Manrope,sans-serif;color:var(--ink2)">Retention: keep audio 30 days, transcripts and fields forever. Only the five Maverio accounts can read this library; every access is written to the audit log.</div>
+            <button onClick="{{ goSettings }}" style="height:30px;padding:0 14px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--ink);font:700 11px Manrope,sans-serif">Review policy</button>
+          </div>
+        </div>
+        </sc-if>
+
+        <!-- ============ CLIENTS ============ -->
+        <sc-if value="{{ isClients }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:26px 28px 40px">
+          <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px">
+            <div>
+              <h1 style="font:600 27px/1.15 Poppins,sans-serif;color:var(--ink);margin:0 0 5px;letter-spacing:-.01em">{{ clientHeading }}</h1>
+              <div style="font:500 12.5px Manrope,sans-serif;color:var(--ink2)">{{ clientSub }}</div>
+            </div>
+            <div style="display:flex;gap:7px">
+              <button onClick="{{ backToClients }}" style="height:32px;padding:0 13px 0 11px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--ink);font:700 11.5px Manrope,sans-serif;display:{{ clientBackDisplay }};align-items:center;gap:6px">← All clients</button>
+              <button onClick="{{ toggleArchiveSel }}" style="height:32px;padding:0 13px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--ink2);font:700 11.5px Manrope,sans-serif;display:{{ clientEditDisplay }}">{{ clientArchiveLabel }}</button>
+              <button onClick="{{ startEditClient }}" style="height:32px;padding:0 13px;border-radius:8px;border:1px solid var(--aqua1);background:var(--tint);color:var(--ink);font:700 11.5px Manrope,sans-serif;display:{{ clientEditDisplay }}">Edit details</button>
+              <button onClick="{{ startNewClient }}" style="height:32px;padding:0 14px;border-radius:8px;border:0;background:linear-gradient(90deg,#4192B9,#5AC3A7);color:#fff;font:700 11.5px Manrope,sans-serif;display:{{ clientAddDisplay }}">+ Add client</button>
+            </div>
+          </div>
+
+          <!-- list -->
+          <sc-if value="{{ clientModeList }}" hint-placeholder-val="{{ true }}">
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(272px,1fr));gap:11px">
+            <sc-for list="{{ clientCards }}" as="c" hint-placeholder-count="6">
+              <div onClick="{{ c.open }}" style="padding:16px 17px;border:1px solid var(--line);border-radius:11px;cursor:pointer;background:var(--panel)" style-hover="border-color:var(--aqua1);background:var(--tint)">
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:9px">
+                  <span style="font:700 14.5px Manrope,sans-serif;color:var(--ink)">{{ c.name }}</span>
+                  <span style="font:700 9.5px Manrope,sans-serif;letter-spacing:.05em;padding:2.5px 7px;border-radius:5px;background:{{ c.pTint }};color:{{ c.pColor }}">{{ c.practice }}</span>
+                </div>
+                <div style="font:600 11.5px Manrope,sans-serif;color:var(--ink2);margin-bottom:12px">{{ c.stage }}</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
+                  <div>
+                    <div style="font:600 17px/1 Poppins,sans-serif;color:var(--ink)">{{ c.meetings }}</div>
+                    <div style="font:600 9.5px Manrope,sans-serif;color:var(--ink3);letter-spacing:.05em;margin-top:4px">MEETINGS</div>
+                  </div>
+                  <div>
+                    <div style="font:600 17px/1 Poppins,sans-serif;color:var(--ink)">{{ c.contactCount }}</div>
+                    <div style="font:600 9.5px Manrope,sans-serif;color:var(--ink3);letter-spacing:.05em;margin-top:4px">CONTACTS</div>
+                  </div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+          <sc-if value="{{ hasArchivedCards }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-top:26px">
+              <div style="font:700 9px Manrope,sans-serif;letter-spacing:.26em;color:var(--ink3);margin-bottom:11px">ARCHIVED</div>
+              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(272px,1fr));gap:11px">
+                <sc-for list="{{ archivedCards }}" as="c" hint-placeholder-count="2">
+                  <div style="padding:14px 16px;border:1px dashed var(--line);border-radius:11px;background:var(--panel2);display:flex;align-items:center;gap:12px">
+                    <div onClick="{{ c.open }}" style="flex:1;min-width:0;cursor:pointer">
+                      <div style="font:700 13.5px Manrope,sans-serif;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ c.name }}</div>
+                      <div style="font:500 11px Manrope,sans-serif;color:var(--ink3);margin-top:4px">{{ c.practice }} · {{ c.meetings }} meetings on file</div>
+                    </div>
+                    <button onClick="{{ c.restore }}" style="height:28px;padding:0 11px;border-radius:7px;border:1px solid var(--line);background:var(--panel);color:var(--ink2);font:700 10.5px Manrope,sans-serif;white-space:nowrap">Restore</button>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+          </sc-if>
+
+          <!-- new / edit client form -->
+          <sc-if value="{{ clientModeForm }}" hint-placeholder-val="{{ false }}">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px;align-items:start">
+            <div style="display:flex;flex-direction:column;gap:18px">
+              <div style="padding:16px 17px;border:1px solid var(--line);border-radius:11px">
+                <div style="font:700 9px Manrope,sans-serif;letter-spacing:.26em;color:var(--ink3);margin-bottom:12px">THE COMPANY</div>
+                <div style="display:flex;flex-direction:column;gap:9px">
+                  <sc-for list="{{ clientFields }}" as="f" hint-placeholder-count="6">
+                    <label style="display:block">
+                      <span style="display:block;font:700 10px Manrope,sans-serif;letter-spacing:.08em;color:var(--ink3);margin-bottom:5px">{{ f.label }}</span>
+                      <input value="{{ f.value }}" onChange="{{ f.set }}" placeholder="{{ f.placeholder }}" style="width:100%;height:34px;padding:0 12px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);font:500 12.5px Manrope,sans-serif;color:var(--ink)">
+                    </label>
+                  </sc-for>
+                  <label style="display:block">
+                    <span style="display:block;font:700 10px Manrope,sans-serif;letter-spacing:.08em;color:var(--ink3);margin-bottom:5px">NOTES</span>
+                    <textarea value="{{ newNotes }}" onChange="{{ onNewNotes }}" placeholder="How they buy, who really decides, anything the team should know before a call" style="width:100%;height:74px;padding:9px 12px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);font:500 12.5px/1.6 Manrope,sans-serif;color:var(--ink);resize:vertical"></textarea>
+                  </label>
+                </div>
+                <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:12px">
+                  <sc-for list="{{ newPractices }}" as="p" hint-placeholder-count="4">
+                    <button onClick="{{ p.pick }}" style="height:28px;padding:0 11px;border-radius:20px;border:1px solid {{ p.border }};background:{{ p.bg }};color:{{ p.fg }};font:700 11px Manrope,sans-serif;display:flex;align-items:center;gap:6px">
+                      <span style="width:7px;height:7px;border-radius:50%;background:{{ p.dot }};display:block"></span>{{ p.label }}
+                    </button>
+                  </sc-for>
+                </div>
+                <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px">
+                  <sc-for list="{{ newStages }}" as="g" hint-placeholder-count="4">
+                    <button onClick="{{ g.pick }}" style="height:28px;padding:0 11px;border-radius:20px;border:1px solid {{ g.border }};background:{{ g.bg }};color:{{ g.fg }};font:600 11px Manrope,sans-serif">{{ g.label }}</button>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:18px">
+              <div style="padding:16px 17px;border:1px solid var(--line);border-radius:11px">
+                <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:12px">
+                  <span style="font:700 9px Manrope,sans-serif;letter-spacing:.26em;color:var(--ink3)">KEY PEOPLE</span>
+                  <span style="font:600 10.5px Manrope,sans-serif;color:var(--ink3)">project managers, decision makers, finance</span>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px">
+                  <sc-for list="{{ newContacts }}" as="c" hint-placeholder-count="2">
+                    <div style="display:grid;grid-template-columns:26px minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px 11px;border-radius:8px;background:var(--panel2)">
+                      <span style="width:26px;height:26px;border-radius:50%;background:{{ c.color }};color:#fff;display:grid;place-items:center;font:700 9px Manrope,sans-serif">{{ c.ini }}</span>
+                      <div style="min-width:0">
+                        <div style="font:700 12px Manrope,sans-serif;color:var(--ink)">{{ c.name }} <span style="font:600 11px Manrope,sans-serif;color:var(--ink3)">· {{ c.role }}</span></div>
+                        <div style="font:500 10.5px Manrope,sans-serif;color:var(--ink3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ c.line }}</div>
+                      </div>
+                      <button onClick="{{ c.remove }}" style="width:22px;height:22px;border-radius:6px;border:0;background:transparent;color:var(--ink3);font-size:12px" style-hover="color:#FF6A00">✕</button>
+                    </div>
+                  </sc-for>
+                </div>
+                <form onSubmit="{{ addContact }}" style="display:grid;grid-template-columns:1fr 1fr;gap:7px">
+                  <input value="{{ ctName }}" onChange="{{ onCtName }}" placeholder="Full name" style="height:32px;padding:0 11px;border-radius:8px;border:1px solid var(--line);background:var(--panel);font:500 12px Manrope,sans-serif;color:var(--ink)">
+                  <input value="{{ ctRole }}" onChange="{{ onCtRole }}" placeholder="Role, e.g. Project manager" style="height:32px;padding:0 11px;border-radius:8px;border:1px solid var(--line);background:var(--panel);font:500 12px Manrope,sans-serif;color:var(--ink)">
+                  <input value="{{ ctEmail }}" onChange="{{ onCtEmail }}" placeholder="Email" style="height:32px;padding:0 11px;border-radius:8px;border:1px solid var(--line);background:var(--panel);font:500 12px Manrope,sans-serif;color:var(--ink)">
+                  <input value="{{ ctPhone }}" onChange="{{ onCtPhone }}" placeholder="Phone" style="height:32px;padding:0 11px;border-radius:8px;border:1px solid var(--line);background:var(--panel);font:500 12px Manrope,sans-serif;color:var(--ink)">
+                  <button type="submit" style="grid-column:span 2;height:32px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--ink);font:700 11px Manrope,sans-serif">+ Add person</button>
+                </form>
+              </div>
+
+              <div style="padding:17px 18px;border-radius:11px;background:var(--tint);border:1px solid var(--line2)">
+                <div style="font:700 9px Manrope,sans-serif;letter-spacing:.26em;color:var(--ink3);margin-bottom:10px">WHAT HAPPENS ON SAVE</div>
+                <div style="font:500 12px/1.7 Manrope,sans-serif;color:var(--ink2);margin-bottom:14px">{{ saveIntro }}</div>
+                <div style="display:flex;gap:8px">
+                  <button onClick="{{ cancelClientForm }}" style="flex:none;height:38px;padding:0 15px;border-radius:9px;border:1px solid var(--line);background:transparent;color:var(--ink2);font:700 12px Manrope,sans-serif">Cancel</button>
+                  <button onClick="{{ saveClient }}" style="flex:1;height:38px;border-radius:9px;border:0;background:{{ saveClientBg }};color:{{ saveClientFg }};font:700 12.5px Manrope,sans-serif">{{ saveClientLabel }}</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          </sc-if>
+
+          <!-- detail -->
+          <sc-if value="{{ clientModeDetail }}" hint-placeholder-val="{{ false }}">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px;align-items:start">
+            <div style="display:flex;flex-direction:column;gap:18px">
+              <div style="border:1px solid var(--line);border-radius:11px;overflow:hidden">
+                <sc-for list="{{ detailFacts }}" as="f" hint-placeholder-count="7">
+                  <div style="display:grid;grid-template-columns:132px minmax(0,1fr);gap:14px;padding:11px 15px;border-bottom:1px solid var(--line2);background:{{ f.bg }}">
+                    <span style="font:600 11px JetBrains Mono,monospace;color:var(--ink3)">{{ f.k }}</span>
+                    <span style="font:600 12.5px/1.55 Manrope,sans-serif;color:var(--ink)">{{ f.v }}</span>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="padding:16px 17px;border:1px solid var(--line);border-radius:11px">
+                <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:10px">
+                  <span style="font:700 9px Manrope,sans-serif;letter-spacing:.26em;color:var(--ink3)">NOTES</span>
+                  <span style="font:600 10.5px Manrope,sans-serif;color:var(--ink3)">{{ noteCount }}</span>
+                </div>
+                <div style="max-height:230px;overflow:auto;padding-right:4px;display:flex;flex-direction:column;gap:12px;margin-bottom:12px">
+                  <sc-for list="{{ detailNotes }}" as="n" hint-placeholder-count="2">
+                    <div style="padding-bottom:12px;border-bottom:1px solid {{ n.divider }}">
+                      <div style="font:600 10px Manrope,sans-serif;letter-spacing:.05em;color:var(--ink3);margin-bottom:5px">{{ n.meta }}</div>
+                      <div style="font:500 12.5px/1.7 Manrope,sans-serif;color:var(--ink2);text-wrap:pretty">{{ n.text }}</div>
+                    </div>
+                  </sc-for>
+                </div>
+                <form onSubmit="{{ addNote }}" style="display:flex;flex-direction:column;gap:7px">
+                  <textarea value="{{ noteDraft }}" onChange="{{ onNoteDraft }}" placeholder="Add a note — what changed, who to watch, what to raise next time" style="width:100%;height:62px;padding:9px 12px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);font:500 12.5px/1.6 Manrope,sans-serif;color:var(--ink);resize:vertical"></textarea>
+                  <button type="submit" style="height:32px;border-radius:8px;border:0;background:{{ noteBtnBg }};color:{{ noteBtnFg }};font:700 11.5px Manrope,sans-serif">{{ noteBtnLabel }}</button>
+                </form>
+              </div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:18px">
+              <div style="padding:16px 17px;border:1px solid var(--line);border-radius:11px">
+                <div style="font:700 9px Manrope,sans-serif;letter-spacing:.26em;color:var(--ink3);margin-bottom:11px">KEY PEOPLE</div>
+                <div style="display:flex;flex-direction:column;gap:7px">
+                  <sc-for list="{{ detailContacts }}" as="c" hint-placeholder-count="2">
+                    <div style="display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:11px;align-items:center">
+                      <span style="width:28px;height:28px;border-radius:50%;background:{{ c.color }};color:#fff;display:grid;place-items:center;font:700 9.5px Manrope,sans-serif">{{ c.ini }}</span>
+                      <div style="min-width:0">
+                        <div style="font:700 12.5px Manrope,sans-serif;color:var(--ink)">{{ c.name }} <span style="font:600 11px Manrope,sans-serif;color:var(--ink3)">· {{ c.role }}</span></div>
+                        <div style="font:500 10.5px Manrope,sans-serif;color:var(--ink3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ c.line }}</div>
+                      </div>
+                      <span style="font:600 9.5px Manrope,sans-serif;color:{{ c.vpColor }};background:{{ c.vpTint }};padding:3px 7px;border-radius:20px;white-space:nowrap">{{ c.vp }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+              <div style="padding:16px 17px;border:1px solid var(--line);border-radius:11px">
+                <div style="font:700 9px Manrope,sans-serif;letter-spacing:.26em;color:var(--ink3);margin-bottom:11px">MEETINGS</div>
+                <div style="display:flex;flex-direction:column;gap:6px">
+                  <sc-for list="{{ detailMeetings }}" as="m" hint-placeholder-count="3">
+                    <button onClick="{{ m.open }}" style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:transparent;text-align:left" style-hover="border-color:var(--aqua1);background:var(--tint)">
+                      <span style="min-width:0">
+                        <span style="display:block;font:700 12.5px Manrope,sans-serif;color:var(--ink)">{{ m.title }}</span>
+                        <span style="display:block;font:600 10.5px Manrope,sans-serif;color:var(--ink3);margin-top:3px">{{ m.meta }}</span>
+                      </span>
+                      <span style="font:500 11px JetBrains Mono,monospace;color:var(--ink3);white-space:nowrap">{{ m.date }}</span>
+                    </button>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+          </div>
+          </sc-if>
+        </div>
+        </sc-if>
+
+        <!-- ============ PREP A MEETING ============ -->
+        <sc-if value="{{ isPrep }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:26px 28px 40px">
+          <h1 style="font:600 27px/1.15 Poppins,sans-serif;color:var(--ink);margin:0 0 5px;letter-spacing:-.01em">Prep a meeting</h1>
+          <div style="font:500 12.5px Manrope,sans-serif;color:var(--ink2);margin-bottom:24px">Set the agenda and the outcomes you want before you walk in. Recall marks each item as it is covered and tells you afterwards what you did not get.</div>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px;align-items:start">
+
+            <div style="display:flex;flex-direction:column;gap:18px">
+              <div style="padding:16px 17px;border:1px solid var(--line);border-radius:11px">
+                <div style="font:700 9px Manrope,sans-serif;letter-spacing:.26em;color:var(--ink3);margin-bottom:11px">THE MEETING</div>
+                <input value="{{ prepTitle }}" onChange="{{ onPrepTitle }}" placeholder="What is this meeting called?" style="width:100%;height:36px;padding:0 12px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);font:600 13px Manrope,sans-serif;color:var(--ink);margin-bottom:10px">
+                <input value="{{ prepClient }}" onChange="{{ onPrepClient }}" placeholder="Client or team" style="width:100%;height:36px;padding:0 12px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);font:500 12.5px Manrope,sans-serif;color:var(--ink);margin-bottom:11px">
+                <div style="display:flex;flex-wrap:wrap;gap:6px">
+                  <sc-for list="{{ prepPractices }}" as="p" hint-placeholder-count="4">
+                    <button onClick="{{ p.pick }}" style="height:28px;padding:0 11px;border-radius:20px;border:1px solid {{ p.border }};background:{{ p.bg }};color:{{ p.fg }};font:700 11px Manrope,sans-serif;display:flex;align-items:center;gap:6px">
+                      <span style="width:7px;height:7px;border-radius:50%;background:{{ p.dot }};display:block"></span>{{ p.label }}
+                    </button>
+                  </sc-for>
+                </div>
+              </div>
+
+              <div style="padding:16px 17px;border:1px solid var(--line);border-radius:11px">
+                <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:11px">
+                  <span style="font:700 9px Manrope,sans-serif;letter-spacing:.26em;color:var(--ink3)">AGENDA</span>
+                  <span style="font:600 10.5px Manrope,sans-serif;color:var(--ink3)">becomes chapter markers in the transcript</span>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px">
+                  <sc-for list="{{ agenda }}" as="a" hint-placeholder-count="3">
+                    <div style="display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px 11px;border-radius:8px;background:var(--panel2)">
+                      <span style="font:700 11px JetBrains Mono,monospace;color:var(--ink3)">{{ a.n }}</span>
+                      <span style="font:600 12.5px/1.45 Manrope,sans-serif;color:var(--ink)">{{ a.text }}</span>
+                      <button onClick="{{ a.remove }}" title="Remove" style="width:22px;height:22px;border-radius:6px;border:0;background:transparent;color:var(--ink3);font-size:12px" style-hover="color:#FF6A00">✕</button>
+                    </div>
+                  </sc-for>
+                </div>
+                <form onSubmit="{{ addAgenda }}" style="display:flex;gap:7px">
+                  <input value="{{ agendaDraft }}" onChange="{{ onAgendaDraft }}" placeholder="Add an agenda item" style="flex:1;min-width:0;height:34px;padding:0 12px;border-radius:8px;border:1px solid var(--line);background:var(--panel);font:500 12.5px Manrope,sans-serif;color:var(--ink)">
+                  <button type="submit" style="width:34px;height:34px;border-radius:8px;border:0;background:linear-gradient(135deg,#4192B9,#5AC3A7);color:#fff;font-size:15px;flex:none">+</button>
+                </form>
+              </div>
+
+              <div style="padding:16px 17px;border:1px solid var(--line);border-radius:11px">
+                <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:11px">
+                  <span style="font:700 9px Manrope,sans-serif;letter-spacing:.26em;color:var(--ink3)">PROPOSED OUTCOMES</span>
+                  <span style="font:600 10.5px Manrope,sans-serif;color:var(--ink3)">checked against real decisions</span>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px">
+                  <sc-for list="{{ outcomes }}" as="o" hint-placeholder-count="2">
+                    <div style="display:grid;grid-template-columns:14px minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px 11px;border-radius:8px;background:var(--tint)">
+                      <span style="width:13px;height:13px;border-radius:4px;border:1.5px solid var(--aqua1);display:block"></span>
+                      <span style="font:600 12.5px/1.45 Manrope,sans-serif;color:var(--ink)">{{ o.text }}</span>
+                      <button onClick="{{ o.remove }}" title="Remove" style="width:22px;height:22px;border-radius:6px;border:0;background:transparent;color:var(--ink3);font-size:12px" style-hover="color:#FF6A00">✕</button>
+                    </div>
+                  </sc-for>
+                </div>
+                <form onSubmit="{{ addOutcome }}" style="display:flex;gap:7px">
+                  <input value="{{ outcomeDraft }}" onChange="{{ onOutcomeDraft }}" placeholder="What has to be true when you leave?" style="flex:1;min-width:0;height:34px;padding:0 12px;border-radius:8px;border:1px solid var(--line);background:var(--panel);font:500 12.5px Manrope,sans-serif;color:var(--ink)">
+                  <button type="submit" style="width:34px;height:34px;border-radius:8px;border:0;background:linear-gradient(135deg,#4192B9,#5AC3A7);color:#fff;font-size:15px;flex:none">+</button>
+                </form>
+              </div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:18px">
+              <div style="padding:16px 17px;border:1px solid var(--line);border-radius:11px">
+                <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:11px">
+                  <span style="font:700 9px Manrope,sans-serif;letter-spacing:.26em;color:var(--ink3)">VOICES IN THE ROOM</span>
+                  <span style="font:600 10.5px Manrope,sans-serif;color:var(--ink3)">{{ attendeeCount }}</span>
+                </div>
+                <div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px">
+                  <sc-for list="{{ voicePicks }}" as="v" hint-placeholder-count="8">
+                    <button onClick="{{ v.toggle }}" title="{{ v.role }}" style="display:flex;align-items:center;gap:7px;height:32px;padding:0 12px 0 4px;border-radius:20px;border:1px solid {{ v.border }};background:{{ v.bg }};font:600 11.5px Manrope,sans-serif;color:{{ v.fg }}">
+                      <span style="width:24px;height:24px;border-radius:50%;background:{{ v.color }};color:#fff;display:grid;place-items:center;font:700 8.5px Manrope,sans-serif">{{ v.ini }}</span>{{ v.name }}
+                    </button>
+                  </sc-for>
+                </div>
+                <div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px">
+                  <sc-for list="{{ guests }}" as="g" hint-placeholder-count="1">
+                    <span style="display:flex;align-items:center;gap:7px;height:32px;padding:0 10px 0 4px;border-radius:20px;border:1px dashed #FF6A00;background:rgba(255,106,0,.06);font:600 11.5px Manrope,sans-serif;color:#FF6A00">
+                      <span style="width:24px;height:24px;border-radius:50%;background:var(--panel3);color:var(--ink2);display:grid;place-items:center;font:700 10px Manrope,sans-serif">?</span>{{ g.label }}
+                      <button onClick="{{ g.remove }}" style="border:0;background:transparent;color:#FF6A00;font-size:11px;padding:0 2px">✕</button>
+                    </span>
+                  </sc-for>
+                </div>
+                <button onClick="{{ addGuest }}" style="height:30px;padding:0 12px;border-radius:8px;border:1px dashed var(--line);background:transparent;color:var(--ink2);font:700 11px Manrope,sans-serif">+ Expected guest</button>
+                <div style="font:500 11px/1.55 Manrope,sans-serif;color:var(--ink3);margin-top:10px">Known voices are matched instantly. Each expected guest reserves a voiceprint slot, so their turns are separated from the start and you only have to name them once.</div>
+              </div>
+
+              <div style="padding:17px 18px;border-radius:11px;background:var(--tint);border:1px solid var(--line2)">
+                <div style="font:700 9px Manrope,sans-serif;letter-spacing:.26em;color:var(--ink3);margin-bottom:12px">RECORDING BRIEF</div>
+                <div style="font:600 15px/1.5 Poppins,sans-serif;color:var(--ink);margin-bottom:12px">{{ briefTitle }}</div>
+                <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:16px">
+                  <sc-for list="{{ brief }}" as="b" hint-placeholder-count="4">
+                    <div style="display:grid;grid-template-columns:118px minmax(0,1fr);gap:12px">
+                      <span style="font:600 11px JetBrains Mono,monospace;color:var(--ink3)">{{ b.k }}</span>
+                      <span style="font:600 12px/1.5 Manrope,sans-serif;color:var(--ink)">{{ b.v }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+                <button onClick="{{ armMeeting }}" style="width:100%;height:38px;border-radius:9px;border:0;background:{{ armBg }};color:{{ armFg }};font:700 12.5px Manrope,sans-serif;margin-bottom:8px">{{ armLabel }}</button>
+                <div style="font:500 10.5px/1.55 Manrope,sans-serif;color:var(--ink3);display:{{ discloseDisplay }}">Disclosure prompt is on: read the one-line script at the top of the call before you begin.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        </sc-if>
+
+        <!-- ============ TEAM & SEATS ============ -->
+        <sc-if value="{{ isTeam }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:26px 28px 40px">
+          <h1 style="font:600 27px/1.15 Poppins,sans-serif;color:var(--ink);margin:0 0 5px;letter-spacing:-.01em">Team &amp; seats</h1>
+          <div style="font:500 12.5px Manrope,sans-serif;color:var(--ink2);margin-bottom:16px">{{ seatLine }}</div>
+          <div style="display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:10px;background:{{ ownerBannerBg }};border:1px solid {{ ownerBannerBorder }};margin-bottom:22px">
+            <span style="width:7px;height:7px;border-radius:50%;background:{{ ownerBannerDot }};flex:none;display:block"></span>
+            <span style="font:600 11.5px/1.5 Manrope,sans-serif;color:var(--ink2)">{{ ownerBanner }}</span>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:11px;margin-bottom:26px">
+            <div style="padding:16px 17px;border:1px solid var(--line);border-radius:11px;background:var(--panel2)">
+              <div style="font:700 9px Manrope,sans-serif;letter-spacing:.26em;color:var(--ink3);margin-bottom:10px">INSTALL LINK</div>
+              <div style="font:500 11.5px JetBrains Mono,monospace;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:9px 11px;margin-bottom:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ inviteLink }}</div>
+              <div style="display:flex;gap:7px;flex-wrap:wrap">
+                <button onClick="{{ copyLink }}" style="height:30px;padding:0 13px;border-radius:8px;border:0;background:linear-gradient(90deg,#4192B9,#5AC3A7);color:#fff;font:700 11px Manrope,sans-serif">{{ copyLinkLabel }}</button>
+                <button style="height:30px;padding:0 13px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font:700 11px Manrope,sans-serif">Download for macOS</button>
+              </div>
+              <div style="font:500 10.5px Manrope,sans-serif;color:var(--ink3);margin-top:9px">Recall 1.4 · Apple silicon &amp; Intel · macOS 14+ · 38 MB. Only @maverio.com addresses can redeem the link.</div>
+            </div>
+
+            <div style="padding:16px 17px;border:1px solid var(--line);border-radius:11px">
+              <div style="font:700 9px Manrope,sans-serif;letter-spacing:.26em;color:var(--ink3);margin-bottom:10px">INVITE A COLLEAGUE</div>
+              <form onSubmit="{{ onInvite }}" style="display:flex;flex-direction:column;gap:8px">
+                <input value="{{ inviteEmail }}" onChange="{{ onInviteEmail }}" placeholder="name@maverio.com" style="height:34px;padding:0 12px;border-radius:8px;border:1px solid {{ inviteBorder }};background:var(--panel2);font:500 12.5px Manrope,sans-serif;color:var(--ink)">
+                <div style="display:flex;gap:6px">
+                  <sc-for list="{{ roles }}" as="r" hint-placeholder-count="2">
+                    <button type="button" onClick="{{ r.pick }}" style="flex:1;height:30px;border-radius:8px;border:1px solid {{ r.border }};background:{{ r.bg }};color:{{ r.fg }};font:700 11px Manrope,sans-serif">{{ r.label }}</button>
+                  </sc-for>
+                </div>
+                <div style="display:flex;gap:6px">
+                  <sc-for list="{{ scopes }}" as="c" hint-placeholder-count="2">
+                    <button type="button" onClick="{{ c.pick }}" style="flex:1;height:30px;border-radius:8px;border:1px solid {{ c.border }};background:{{ c.bg }};color:{{ c.fg }};font:700 11px Manrope,sans-serif">{{ c.label }}</button>
+                  </sc-for>
+                </div>
+                <button type="submit" style="height:34px;border-radius:8px;border:0;background:{{ inviteBtnBg }};color:{{ inviteBtnFg }};font:700 11.5px Manrope,sans-serif">{{ inviteBtnLabel }}</button>
+              </form>
+              <div style="font:500 10.5px/1.5 Manrope,sans-serif;color:var(--ink3);margin-top:9px">{{ inviteHelp }}</div>
+            </div>
+          </div>
+
+          <div style="font:700 9px Manrope,sans-serif;letter-spacing:.26em;color:var(--ink3);margin-bottom:11px">MEMBERS</div>
+          <div style="border:1px solid var(--line);border-radius:11px;overflow:hidden">
+            <sc-for list="{{ team }}" as="t" hint-placeholder-count="5">
+              <div style="display:grid;grid-template-columns:32px minmax(0,1fr) auto auto auto;gap:12px;align-items:center;padding:12px 15px;border-bottom:1px solid var(--line2);background:{{ t.rowBg }}">
+                <span style="width:32px;height:32px;border-radius:50%;background:{{ t.color }};color:#fff;display:grid;place-items:center;font:700 10.5px Manrope,sans-serif">{{ t.ini }}</span>
+                <div style="min-width:0">
+                  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                    <span style="font:700 13px Manrope,sans-serif;color:var(--ink)">{{ t.name }}</span>
+                    <span style="font:700 9px Manrope,sans-serif;letter-spacing:.05em;padding:2.5px 7px;border-radius:5px;background:{{ t.roleTint }};color:{{ t.roleColor }}">{{ t.role }}</span>
+                  </div>
+                  <div style="font:500 11px Manrope,sans-serif;color:var(--ink3);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ t.email }} · {{ t.seen }}</div>
+                </div>
+                <div style="display:flex;gap:0;border:1px solid var(--line);border-radius:7px;overflow:hidden;opacity:{{ t.scopeOpacity }}">
+                  <sc-for list="{{ t.scopeOpts }}" as="o" hint-placeholder-count="2">
+                    <button onClick="{{ o.pick }}" title="{{ o.title }}" style="height:26px;padding:0 10px;border:0;border-right:1px solid var(--line);background:{{ o.bg }};color:{{ o.fg }};font:700 10px Manrope,sans-serif;white-space:nowrap">{{ o.label }}</button>
+                  </sc-for>
+                </div>
+                <span style="font:600 10.5px Manrope,sans-serif;color:{{ t.vpColor }};background:{{ t.vpTint }};padding:4px 9px;border-radius:20px;white-space:nowrap">{{ t.voiceprint }}</span>
+                <button onClick="{{ t.act }}" style="height:28px;padding:0 11px;border-radius:7px;border:1px solid var(--line);background:transparent;color:var(--ink2);font:700 10.5px Manrope,sans-serif;white-space:nowrap" style-hover="border-color:var(--aqua1);color:var(--ink)">{{ t.actLabel }}</button>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="margin-top:18px;padding:15px 17px;border:1px dashed var(--line);border-radius:11px;font:500 12px/1.65 Manrope,sans-serif;color:var(--ink2)"><strong style="color:var(--ink)">Lana Marov is the owner</strong> — the only account that can promote or demote admins, change anyone's library access, or transfer ownership. Admins can invite and manage seats but cannot widen their own access. <strong style="color:var(--ink)">Full library</strong> reads every meeting ever recorded; <strong style="color:var(--ink)">Attended only</strong> limits a member to meetings their voiceprint appears in. Every read is written to the audit log with account and timestamp.</div>
+        </div>
+        </sc-if>
+
+        <!-- ============ SETTINGS ============ -->
+        <sc-if value="{{ isSettings }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:26px 28px 40px;max-width:760px">
+          <h1 style="font:600 27px/1.15 Poppins,sans-serif;color:var(--ink);margin:0 0 5px;letter-spacing:-.01em">Capture &amp; policy</h1>
+          <div style="font:500 12.5px Manrope,sans-serif;color:var(--ink2);margin-bottom:16px">{{ policyIntro }}</div>
+          <div style="display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:10px;background:{{ ownerBannerBg }};border:1px solid {{ ownerBannerBorder }};margin-bottom:22px">
+            <span style="width:7px;height:7px;border-radius:50%;background:{{ ownerBannerDot }};flex:none;display:block"></span>
+            <span style="font:600 11.5px/1.5 Manrope,sans-serif;color:var(--ink2)">{{ policyBanner }}</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:9px">
+            <sc-for list="{{ settings }}" as="s" hint-placeholder-count="5">
+              <div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center;padding:15px 17px;border:1px solid var(--line);border-radius:11px">
+                <div style="min-width:0">
+                  <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+                    <span style="font:700 13px Manrope,sans-serif;color:var(--ink)">{{ s.label }}</span>
+                    <span style="font:700 9px Manrope,sans-serif;letter-spacing:.05em;padding:2.5px 7px;border-radius:5px;background:var(--panel3);color:var(--ink3);display:{{ s.lockDisplay }}">OWNER ONLY</span>
+                  </div>
+                  <div style="font:500 11.5px/1.55 Manrope,sans-serif;color:var(--ink2)">{{ s.help }}</div>
+                </div>
+                <button onClick="{{ s.toggle }}" title="{{ s.title }}" style="width:44px;height:25px;border-radius:20px;border:0;background:{{ s.track }};position:relative;flex:none;opacity:{{ s.opacity }};cursor:{{ s.cursor }}">
+                  <span style="position:absolute;top:3px;left:{{ s.knob }};width:19px;height:19px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:left .16s ease;display:block"></span>
+                </button>
+              </div>
+            </sc-for>
+          </div>
+          <div style="margin-top:22px;padding:15px 17px;border-radius:11px;background:var(--tint);font:500 12px/1.65 Manrope,sans-serif;color:var(--ink2)">Recall never joins the call as a participant and adds no plugin — it captures the Mac's own audio output plus your microphone. Recording law varies by state and country; keep <strong style="color:var(--ink)">Disclosure prompt</strong> on unless your legal counsel has cleared one-party consent for the jurisdictions you work in.</div>
+        </div>
+        </sc-if>
+
+      </div>
+
+      <!-- ask rail -->
+      <sc-if value="{{ scrim }}" hint-placeholder-val="{{ false }}">
+        <div onClick="{{ toggleRail }}" style="position:absolute;inset:52px 0 0;background:rgba(10,17,22,.34);z-index:5"></div>
+      </sc-if>
+      <sc-if value="{{ railOpen }}" hint-placeholder-val="{{ true }}">
+      <div style="flex:none;position:{{ railPos }};top:52px;right:0;bottom:0;z-index:6;box-shadow:{{ railShadow }};width:{{ railW }};max-width:100%;display:flex;flex-direction:column;border-left:1px solid var(--line);background:var(--panel2);min-height:0">
+        <div style="flex:none;padding:16px 16px 12px;border-bottom:1px solid var(--line)">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
+            <span style="width:7px;height:7px;border-radius:50%;background:linear-gradient(90deg,#4192B9,#5AC3A7);display:block"></span>
+            <span style="font:700 12.5px Manrope,sans-serif;color:var(--ink)">Ask your meetings</span>
+          </div>
+          <div style="font:600 10.5px Manrope,sans-serif;color:var(--ink3)">{{ askScope }}</div>
+        </div>
+
+        <div style="flex:1;overflow:auto;padding:14px 16px;display:flex;flex-direction:column;gap:13px;min-height:0">
+          <sc-for list="{{ chat }}" as="c" hint-placeholder-count="3">
+            <div style="animation:rise .22s ease both">
+              <div style="font:700 9px Manrope,sans-serif;letter-spacing:.2em;color:{{ c.tagColor }};margin-bottom:6px">{{ c.tag }}</div>
+              <div style="font:500 13px/1.68 Manrope,sans-serif;color:{{ c.fg }};background:{{ c.bg }};border:1px solid {{ c.border }};padding:11px 13px;border-radius:10px;text-wrap:pretty">{{ c.text }}</div>
+              <sc-if value="{{ c.hasCites }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px">
+                  <sc-for list="{{ c.cites }}" as="q" hint-placeholder-count="2">
+                    <button onClick="{{ q.open }}" style="display:flex;align-items:center;gap:6px;height:24px;padding:0 9px;border-radius:6px;border:1px solid var(--line);background:var(--panel);color:var(--ink2);font:600 10.5px Manrope,sans-serif" style-hover="border-color:var(--aqua1);color:var(--ink)">
+                      <span style="width:5px;height:5px;border-radius:50%;background:{{ q.dot }};display:block"></span>{{ q.label }}
+                    </button>
+                  </sc-for>
+                </div>
+              </sc-if>
+            </div>
+          </sc-for>
+          <sc-if value="{{ thinking }}" hint-placeholder-val="{{ false }}">
+            <div style="font:600 11.5px Manrope,sans-serif;color:var(--ink3)">Reading 8 meetings…</div>
+          </sc-if>
+        </div>
+
+        <div style="flex:none;padding:11px 14px 14px;border-top:1px solid var(--line)">
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">
+            <sc-for list="{{ prompts }}" as="p" hint-placeholder-count="3">
+              <button onClick="{{ p.ask }}" style="height:25px;padding:0 10px;border-radius:20px;border:1px solid var(--line);background:var(--panel);color:var(--ink2);font:600 10.5px Manrope,sans-serif" style-hover="border-color:var(--aqua2);color:var(--ink)">{{ p.label }}</button>
+            </sc-for>
+          </div>
+          <form onSubmit="{{ onSubmitAsk }}" style="display:flex;gap:7px;align-items:center">
+            <input value="{{ draft }}" onChange="{{ onDraft }}" placeholder="Ask anything about your meetings" style="flex:1;min-width:0;height:34px;padding:0 12px;border-radius:9px;border:1px solid var(--line);background:var(--panel);font:500 12.5px Manrope,sans-serif;color:var(--ink)">
+            <button type="submit" style="width:34px;height:34px;border-radius:9px;border:0;background:linear-gradient(135deg,#4192B9,#5AC3A7);color:#fff;font-size:14px;display:grid;place-items:center;flex:none">↑</button>
+          </form>
+        </div>
+      </div>
+      </sc-if>
+    </div>
+  </div>
+
+  <!-- account & settings menu -->
+  <sc-if value="{{ accountMenu }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ toggleAccountMenu }}" style="position:absolute;inset:0;z-index:15"></div>
+    <div style="position:absolute;left:12px;top:64px;bottom:64px;width:286px;max-height:calc(100% - 128px);z-index:16;display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 22px 60px rgba(0,0,0,.32);overflow:hidden;animation:rise .16s ease both">
+      <div style="flex:none;padding:14px 15px;border-bottom:1px solid var(--line);background:var(--panel2);display:flex;align-items:center;gap:10px">
+        <span style="width:32px;height:32px;border-radius:50%;background:{{ meAvatarBg }};color:#fff;display:grid;place-items:center;font:700 11px Manrope,sans-serif;flex:none">{{ meIni }}</span>
+        <div style="min-width:0">
+          <div style="font:700 13px Manrope,sans-serif;color:var(--ink)">{{ meName }}</div>
+          <div style="font:600 10.5px Manrope,sans-serif;color:{{ meRoleColor }}">{{ meRole }}</div>
+        </div>
+      </div>
+
+      <div style="flex:1;min-height:0;overflow:auto">
+      <div style="padding:8px 8px 4px">
+        <div style="font:700 9px Manrope,sans-serif;letter-spacing:.24em;color:var(--ink3);padding:6px 8px 8px">SETTINGS</div>
+        <sc-for list="{{ accountLinks }}" as="a" hint-placeholder-count="4">
+          <button onClick="{{ a.go }}" style="display:flex;align-items:center;gap:10px;width:100%;padding:9px 9px;border:0;border-radius:8px;background:transparent;color:var(--ink);font:600 12.5px Manrope,sans-serif;text-align:left" style-hover="background:var(--tint)">
+            <span style="width:16px;text-align:center;font-size:12px;color:var(--ink3)">{{ a.icon }}</span>
+            <span style="flex:1">{{ a.label }}</span>
+            <span style="font:600 10px Manrope,sans-serif;color:var(--ink3)">{{ a.meta }}</span>
+          </button>
+        </sc-for>
+      </div>
+
+      <div style="padding:4px 8px 8px;border-top:1px solid var(--line2);margin-top:4px">
+        <div style="font:700 9px Manrope,sans-serif;letter-spacing:.24em;color:var(--ink3);padding:8px 8px 8px">APPEARANCE</div>
+        <div style="display:flex;gap:6px;padding:0 8px 6px">
+          <sc-for list="{{ themeOpts }}" as="t" hint-placeholder-count="2">
+            <button onClick="{{ t.pick }}" style="flex:1;height:29px;border-radius:8px;border:1px solid {{ t.border }};background:{{ t.bg }};color:{{ t.fg }};font:700 11px Manrope,sans-serif">{{ t.label }}</button>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="padding:4px 8px 10px;border-top:1px solid var(--line2)">
+        <div style="font:700 9px Manrope,sans-serif;letter-spacing:.24em;color:var(--ink3);padding:8px 8px 6px">PREVIEW AS</div>
+        <sc-for list="{{ accountList }}" as="a" hint-placeholder-count="3">
+          <button onClick="{{ a.pick }}" style="display:flex;align-items:center;gap:9px;width:100%;padding:7px 9px;border:0;border-radius:8px;background:{{ a.bg }};font:600 12px Manrope,sans-serif;color:var(--ink);text-align:left" style-hover="background:var(--tint)">
+            <span style="width:22px;height:22px;border-radius:50%;background:{{ a.color }};color:#fff;display:grid;place-items:center;font:700 8px Manrope,sans-serif;flex:none">{{ a.ini }}</span>
+            <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ a.name }}</span>
+            <span style="font:600 9.5px Manrope,sans-serif;color:var(--ink3)">{{ a.role }}</span>
+          </button>
+        </sc-for>
+        <div style="font:500 10.5px/1.5 Manrope,sans-serif;color:var(--ink3);padding:8px 9px 0">Audit log is on — every read and export is recorded against the account above.</div>
+      </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- live HUD pill -->
+  <sc-if value="{{ recording }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;bottom:22px;left:50%;transform:translateX(-50%);z-index:9;display:flex;align-items:center;flex-wrap:nowrap;width:max-content;max-width:96%;overflow:hidden;gap:13px;padding:9px 13px;border-radius:36px;background:rgba(10,17,22,.94);border:1px solid rgba(255,255,255,.13);box-shadow:0 16px 44px rgba(0,0,0,.44);backdrop-filter:blur(14px);animation:rise .2s ease both">
+      <span style="width:9px;height:9px;border-radius:50%;background:#FF6A00;animation:recdot 1.3s ease-in-out infinite,ring 1.8s ease-out infinite;flex:none;display:block"></span>
+      <span style="font:600 12px JetBrains Mono,monospace;color:#fff;flex:none">{{ elapsed }}</span>
+      <span style="width:1px;height:20px;background:rgba(255,255,255,.16);display:block"></span>
+      <div style="display:flex;align-items:center;gap:9px;flex-wrap:nowrap;flex:0 0 auto">
+        <sc-for list="{{ liveSpeakers }}" as="s" hint-placeholder-count="3">
+          <div style="display:flex;align-items:center;gap:7px;height:26px;padding:0 10px 0 3px;border-radius:20px;background:{{ s.chipBg }};border:1px solid {{ s.chipBorder }};animation:rise .28s ease both;flex:none">
+            <span style="width:20px;height:20px;border-radius:50%;background:{{ s.color }};color:#fff;display:grid;place-items:center;font:700 8px Manrope,sans-serif;opacity:{{ s.op }};flex:none">{{ s.ini }}</span>
+            <span style="font:700 10.5px Manrope,sans-serif;color:{{ s.nameFg }};white-space:nowrap">{{ s.name }}</span>
+            <div style="display:flex;align-items:center;gap:2px;height:14px">
+              <sc-for list="{{ s.bars }}" as="b" hint-placeholder-count="4">
+                <span style="width:2.5px;height:14px;border-radius:2px;background:{{ s.bg }};transform-origin:center;animation:lvl {{ b.dur }} ease-in-out infinite;animation-delay:{{ b.delay }};display:block"></span>
+              </sc-for>
+            </div>
+          </div>
+        </sc-for>
+        <sc-if value="{{ pendingVoices }}" hint-placeholder-val="{{ false }}">
+          <span style="font:600 10.5px Manrope,sans-serif;color:rgba(255,255,255,.5);white-space:nowrap">{{ pendingLabel }}</span>
+        </sc-if>
+      </div>
+      <span style="width:1px;height:20px;background:rgba(255,255,255,.16);display:block"></span>
+      <button onClick="{{ toggleScreenRec }}" title="{{ screenTitle }}" style="display:flex;align-items:center;gap:6px;height:26px;padding:0 11px;border-radius:20px;border:1px solid {{ screenBorder }};background:{{ screenChipBg }};color:{{ screenChipFg }};font:700 10.5px Manrope,sans-serif">
+        <span style="font-size:11px;line-height:1">⧉</span>{{ screenChipLabel }}
+      </button>
+      <button onClick="{{ toggleRecord }}" style="height:26px;padding:0 12px;border-radius:20px;border:0;background:rgba(255,255,255,.14);color:#fff;font:700 10.5px Manrope,sans-serif">STOP</button>
+    </div>
+  </sc-if>
+
+  <!-- voice naming modal -->
+  <sc-if value="{{ namerOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;z-index:14;background:rgba(10,17,22,.5);backdrop-filter:blur(3px);display:grid;place-items:center;padding:24px">
+      <div style="width:100%;max-width:420px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px;box-shadow:0 30px 80px rgba(0,0,0,.4);animation:rise .2s ease both">
+        <div style="font:700 9px Manrope,sans-serif;letter-spacing:.26em;color:var(--ink3);margin-bottom:9px">NAME THIS VOICE</div>
+        <div style="font:600 17px/1.35 Poppins,sans-serif;color:var(--ink);margin-bottom:6px">{{ namerTitle }}</div>
+        <div style="font:500 12px/1.6 Manrope,sans-serif;color:var(--ink2);margin-bottom:16px">{{ namerHint }}</div>
+        <div style="display:flex;align-items:flex-end;gap:2px;height:38px;margin-bottom:16px">
+          <sc-for list="{{ namerWave }}" as="w" hint-placeholder-count="34">
+            <span style="flex:1;height:{{ w.h }};background:linear-gradient(180deg,#4192B9,#5AC3A7);border-radius:2px;opacity:.65;display:block"></span>
+          </sc-for>
+        </div>
+        <div style="font:700 9.5px Manrope,sans-serif;letter-spacing:.1em;color:var(--ink3);margin-bottom:8px">SUGGESTED FROM THE INVITE</div>
+        <div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px">
+          <sc-for list="{{ namerSuggestions }}" as="s" hint-placeholder-count="3">
+            <button onClick="{{ s.pick }}" style="height:29px;padding:0 12px;border-radius:8px;border:1px solid {{ s.border }};background:{{ s.bg }};color:{{ s.fg }};font:700 11.5px Manrope,sans-serif">{{ s.label }}</button>
+          </sc-for>
+        </div>
+        <input value="{{ namerDraft }}" onChange="{{ onNamerDraft }}" placeholder="Or type a name" style="width:100%;height:38px;padding:0 13px;border-radius:9px;border:1px solid var(--line);background:var(--panel2);font:500 13px Manrope,sans-serif;color:var(--ink);margin-bottom:8px">
+        <label style="display:flex;align-items:center;gap:8px;font:500 11.5px Manrope,sans-serif;color:var(--ink2);margin-bottom:18px">
+          <input type="checkbox" checked="{{ namerApplyAll }}" onChange="{{ onNamerApplyAll }}" style="accent-color:#4192B9;width:15px;height:15px">
+          Apply to all 4 past meetings with this voiceprint
+        </label>
+        <div style="display:flex;gap:8px">
+          <button onClick="{{ closeNamer }}" style="flex:none;height:36px;padding:0 15px;border-radius:9px;border:1px solid var(--line);background:transparent;color:var(--ink2);font:700 12px Manrope,sans-serif">Cancel</button>
+          <button onClick="{{ saveNamer }}" style="flex:1;height:36px;border-radius:9px;border:0;background:linear-gradient(90deg,#4192B9,#5AC3A7);color:#fff;font:700 12px Manrope,sans-serif">Save voiceprint</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;defaultTheme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light'|'dark'&quot;,&quot;section&quot;:&quot;Appearance&quot;},&quot;redactionOn&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Export&quot;}}">
+const AQ1='#4192B9', AQ2='#5AC3A7';
+const PR={
+  'Consulting':{c:'#7835FE',t:'rgba(120,53,254,.12)'},
+  'Growth iQ':{c:'#27AC53',t:'rgba(39,172,83,.12)'},
+  'Capability':{c:'#FF6A00',t:'rgba(255,106,0,.12)'},
+  'Internal':{c:'#4192B9',t:'rgba(65,146,185,.13)'}
+};
+const P={
+  DO:{n:'Lana Marov',c:'#4192B9',r:'Strategy Director · Maverio'},
+  PR:{n:'Priya Raman',c:'#27AC53',r:'Growth iQ lead · Maverio'},
+  TL:{n:'Tom Lasky',c:'#7835FE',r:'Delivery · Maverio'},
+  NF:{n:'Nadia Fenn',c:'#FF6A00',r:'Capability · Maverio'},
+  MB:{n:'Marcus Bell',c:'#C9A24A',r:'Partner · Maverio'},
+  IK:{n:'Ines Kovač',c:'#0195BD',r:'COO · Hartline Logistics'},
+  RS:{n:'Ray Sandoval',c:'#88DB0D',r:'CFO · Verdon Health'},
+  EK:{n:'Elena Kessler',c:'#AC51F6',r:'Managing Partner · Kessler & Roe'}
+};
+const ini = n => n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+const replaceAll = (str,find,rep) => str.split(find).join(rep);
+const hm = v => { const n=parseInt(v,10)||0; const h=Math.floor(n/60), m=n%60;
+  return h ? (m ? h+'h '+m+'m' : h+'h') : m+'m'; };
+
+const MEET=[
+ {id:'m1',title:'Diagnostic readout',client:'Hartline Logistics',practice:'Consulting',dow:'FRI',day:'4',mon:'SEP',time:'10:00',dur:'62 min',dec:3,act:5,people:['DO','TL','IK'],unknown:1,
+  summary:'Hartline accepted the diagnostic: their cost-to-serve problem is routing discipline, not headcount. Ines pushed back on the 90-day timeline and we agreed to a phased delivery with a paid pilot on the Midlands depot first. Fee discussion landed at £84k for phase one, with phase two contingent on pilot metrics.',
+  decisions:[{text:'Phase delivery — Midlands depot pilot first, national rollout gated on a 6% cost-to-serve improvement.',cite:'m1 · 18:42 · Ines Kovač'},
+             {text:'Phase one fee set at £84,000, invoiced monthly across three months.',cite:'m1 · 41:07 · Lana Marov'},
+             {text:'Tom embeds two days a week on site rather than running it remote.',cite:'m1 · 52:19 · Tom Lasky'}],
+  objective:'Get Hartline to fund delivery without signing the 90-day national programme they were resisting.',
+  objectiveCite:'18:42 · Ines Kovač',
+  gaps:[{q:'Who is the finance owner for the pilot budget line?',why:'Ines said she can get £84k through finance without a board paper, but never named a person.',cite:'41:44 · Ines Kovač'},
+        {q:'What is the deadline for “send it this week”?',why:'The SOW was committed to “this week” with no date said aloud.',cite:'41:44 · Ines Kovač'}],
+  actions:[{who:'TL',text:'Draft the pilot scope and the depot data request',due:'Mon 8 Sep',src:'26:38 · Tom Lasky'},
+           {who:'DO',text:'Send the phased SOW with the £84,000 phase-one fee',due:'“this week” — no date stated',src:'41:07 · Lana Marov'},
+           {who:'IK',text:'Take the £84k pilot budget line through finance',due:'not stated',src:'41:44 · Ines Kovač'},
+           {who:'TL',text:'Arrange the depot walkthrough via Priya, who runs that calendar',due:'not stated',src:'58:02 · Ines Kovač'}],
+  fields:[{key:'client',val:'Hartline Logistics'},{key:'engagement_stage',val:'Diagnostic → Delivery (proposal out)'},{key:'practice',val:'Consulting'},{key:'revenue_mentioned',val:'£84,000 phase one · £210,000 indicative phase two'},{key:'risks',val:'Timeline pressure; depot data quality unverified'},{key:'decision_maker',val:'Ines Kovač (COO)'},{key:'next_step',val:'Phased SOW by 9 Sep'}],
+  lines:[
+   {t:'00:12',k:'DO',text:'Before we get into the numbers — the short version is that we came in expecting a headcount story and the data told us something different.'},
+   {t:'00:31',k:'IK',text:'Different how? Because the board has been told this is a staffing problem for two years.'},
+   {t:'01:04',k:'TL',text:'Cost-to-serve variance across your depots is 34%. Same volumes, same vehicle mix. That is routing discipline, not people.'},
+   {t:'02:20',k:'IK',text:'That is going to be an awkward conversation upstairs, but I would rather have it now.'},
+   {t:'18:42',k:'IK',text:'I am not signing a 90-day national programme on a slide. Give me one depot, give me a number I can hold you to, and I will fund the rest.'},
+   {t:'19:15',k:'DO',text:'Then we phase it. Midlands depot pilot, six percent improvement in cost-to-serve as the gate, national rollout after.'},
+   {t:'26:03',k:'?1',text:'Sorry — can I ask about the data extract? Our warehouse system only keeps eight weeks of route history.'},
+   {t:'26:38',k:'TL',text:'Eight weeks is enough for the pilot baseline. We will need a longer pull before rollout.'},
+   {t:'41:07',k:'DO',text:'Phase one is eighty-four thousand, invoiced monthly across the three months. Phase two we scope after the gate.'},
+   {t:'41:44',k:'IK',text:'That I can get through finance without a board paper. Send it this week.'},
+   {t:'52:19',k:'TL',text:'One condition from my side — I want two days a week on site. Remote delivery on a routing problem does not work.'},
+   {t:'58:02',k:'IK',text:'Fine. Talk to Priya about the depot walkthrough, she runs that calendar.'}]},
+
+ {id:'m2',title:'Pricing model review',client:'Verdon Health',practice:'Growth iQ',dow:'THU',day:'3',mon:'SEP',time:'14:30',dur:'48 min',dec:2,act:3,people:['PR','MB','RS'],unknown:0,
+  summary:'Verdon wants the Growth iQ benchmark data licensed rather than delivered as a report. Ray floated an annual seat model; Priya held the line on the report plus a data addendum. Real signal here: three of their competitors have asked us the same thing this quarter — there is a product in this.',
+  decisions:[{text:'Sell the Q4 benchmark as a report plus a data addendum, not a seat licence.',cite:'m2 · 22:10 · Priya Raman'},
+             {text:'Price the addendum at £18k annually, renewable with the report cycle.',cite:'m2 · 35:50 · Marcus Bell'}],
+  objective:'Keep Verdon on the report model while giving them enough data access to renew.',
+  objectiveCite:'22:10 · Priya Raman',
+  gaps:[{q:'Which data cuts does Verdon actually need in the addendum?',why:'Priya offered “the cuts you need”; the specific cuts were never listed on the call.',cite:'22:10 · Priya Raman'},
+        {q:'Do you want the peer product idea scoped now?',why:'Marcus noted three peers asked for the same thing, but no owner or date was agreed.',cite:'44:10 · Marcus Bell'}],
+  actions:[{who:'PR',text:'Send the addendum terms with the cut list for Verdon',due:'not stated',src:'22:10 · Priya Raman'},
+           {who:'RS',text:'Get the £18k addendum into the Q4 budget',due:'Q4 budget cycle',src:'36:22 · Ray Sandoval'}],
+  fields:[{key:'client',val:'Verdon Health'},{key:'engagement_stage',val:'Renewal / upsell'},{key:'practice',val:'Growth iQ'},{key:'revenue_mentioned',val:'£18,000 data addendum (annual)'},{key:'risks',val:'Client prefers seat licence; IP exposure on raw benchmark'},{key:'decision_maker',val:'Ray Sandoval (CFO)'},{key:'next_step',val:'Addendum terms by 5 Sep'}],
+  lines:[
+   {t:'00:20',k:'RS',text:'The report is good. What we actually want is the underlying data, in our own tooling.'},
+   {t:'03:41',k:'PR',text:'I understand the pull. The problem is the benchmark is only defensible with our methodology attached to it.'},
+   {t:'22:10',k:'PR',text:'Here is where I can go — the report as it stands, plus a data addendum with the cuts you need. Not a seat licence to the whole set.'},
+   {t:'35:50',k:'MB',text:'Eighteen thousand a year for the addendum, renewing with the report. That is the number.'},
+   {t:'36:22',k:'RS',text:'I can defend eighteen. Send it and I will get it into the Q4 budget.'},
+   {t:'44:10',k:'MB',text:'Priya, worth noting three of their peers asked for the same thing this quarter. There is a product here.'}]},
+
+ {id:'m3',title:'Monday ops',client:'Maverio internal',practice:'Internal',dow:'TUE',day:'2',mon:'SEP',time:'09:00',dur:'24 min',dec:1,act:4,people:['DO','PR','TL','NF','MB'],unknown:0,
+  summary:'Capacity is the constraint, not pipeline. Tom is at 110% with Hartline landing, Nadia has Kessler kickoff prep, and Marcus wants the Growth iQ product idea scoped before it gets lost. Agreed to hold new Consulting proposals for two weeks.',
+  decisions:[{text:'Hold new Consulting proposals for two weeks until Hartline phase one is staffed.',cite:'m3 · 14:20 · Marcus Bell'}],
+  objective:'Protect delivery capacity while Hartline lands.',
+  objectiveCite:'14:20 · Marcus Bell',
+  gaps:[{q:'What comes off Tom, specifically?',why:'Tom said something has to come off him at 110%; no one named which engagement.',cite:'02:15 · Tom Lasky'},
+        {q:'Who owns the data-product thread?',why:'Priya flagged it as a signal but no owner or date was said.',cite:'19:40 · Priya Raman'}],
+  actions:[{who:'DO',text:'Take work off Tom before Hartline starts — item not named on the call',due:'not stated',src:'02:15 · Tom Lasky'},
+           {who:'MB',text:'Hold new Consulting proposals for two weeks',due:'two weeks from 2 Sep',src:'14:20 · Marcus Bell'}],
+  fields:[{key:'client',val:'— internal'},{key:'engagement_stage',val:'n/a'},{key:'practice',val:'Internal'},{key:'revenue_mentioned',val:'—'},{key:'risks',val:'Delivery capacity at 110% for two weeks'},{key:'decision_maker',val:'Marcus Bell'},{key:'next_step',val:'iQ product one-pager by 5 Sep'}],
+  lines:[
+   {t:'02:15',k:'TL',text:'If Hartline lands this week I am at a hundred and ten percent. Something has to come off me.'},
+   {t:'14:20',k:'MB',text:'Then we hold new Consulting proposals for two weeks. Pipeline is not our problem right now, capacity is.'},
+   {t:'19:40',k:'PR',text:'Do not lose the data-product thread. Three inbound asks in a quarter is a signal.'}]},
+
+ {id:'m4',title:'Capability kickoff',client:'Kessler & Roe',practice:'Capability',dow:'FRI',day:'29',mon:'AUG',time:'11:00',dur:'71 min',dec:4,act:6,people:['NF','MB','EK'],unknown:2,
+  summary:'Kessler wants their senior associates to run client diagnostics themselves within two quarters. Elena was blunt that previous training did not stick because nothing changed in how work was reviewed. Agreed the programme is built around live client files, not case studies.',
+  decisions:[{text:'Programme runs on live client files, not case studies.',cite:'m4 · 24:05 · Elena Kessler'},
+             {text:'Six cohorts of eight, fortnightly, over two quarters.',cite:'m4 · 38:12 · Nadia Fenn'},
+             {text:'Partner review checklist changes at the same time or the training does not count.',cite:'m4 · 51:30 · Elena Kessler'},
+             {text:'Fee £126k across two quarters, 40% on kickoff.',cite:'m4 · 63:18 · Marcus Bell'}],
+  objective:'Build a capability programme that changes how work is reviewed, not just what associates are taught.',
+  objectiveCite:'24:05 · Elena Kessler',
+  gaps:[{q:'Who signs the £126k SOW, and by when?',why:'Marcus stated the fee and milestone; no signatory or date was discussed.',cite:'63:18 · Marcus Bell'},
+        {q:'Which cohort runs hybrid, and who picks the participants?',why:'Nadia agreed one hybrid cohort to test remote; the cohort and selection owner were not named.',cite:'45:22 · Nadia Fenn'}],
+  actions:[{who:'NF',text:'Build the curriculum on live client files across six fortnightly cohorts of eight',due:'not stated',src:'38:12 · Nadia Fenn'},
+           {who:'NF',text:'Revise the partner review checklist alongside the programme',due:'not stated',src:'51:30 · Elena Kessler'},
+           {who:'MB',text:'Issue the £126,000 SOW with 40% at kickoff',due:'not stated',src:'63:18 · Marcus Bell'},
+           {who:'NF',text:'Run one cohort hybrid to test whether it holds up remote',due:'not stated',src:'45:22 · Nadia Fenn'}],
+  fields:[{key:'client',val:'Kessler & Roe'},{key:'engagement_stage',val:'Kickoff / delivery'},{key:'practice',val:'Capability'},{key:'revenue_mentioned',val:'£126,000 across two quarters'},{key:'risks',val:'Prior training failed; partner review behaviour must change'},{key:'decision_maker',val:'Elena Kessler (Managing Partner)'},{key:'next_step',val:'Curriculum outline by 4 Sep'}],
+  lines:[
+   {t:'24:05',k:'EK',text:'We have done training before. It did not stick because nothing changed in how the work got reviewed. Build it on live files or do not build it.'},
+   {t:'38:12',k:'NF',text:'Six cohorts of eight, fortnightly, across two quarters. That is the shape that survives a fee-earner calendar.'},
+   {t:'44:50',k:'?2',text:'Would that include the associates in the Manchester office, or London only?'},
+   {t:'45:22',k:'NF',text:'Both. We run one cohort hybrid to test whether it holds up remote.'},
+   {t:'51:30',k:'EK',text:'And the partner review checklist changes at the same time. Otherwise this is theatre.'},
+   {t:'63:18',k:'MB',text:'A hundred and twenty-six across the two quarters, forty percent at kickoff.'}]},
+
+ {id:'m5',title:'Discovery call',client:'Northmoor Retail',practice:'Consulting',dow:'THU',day:'28',mon:'AUG',time:'15:00',dur:'39 min',dec:1,act:2,people:['DO','TL'],unknown:1,
+  summary:'Northmoor is shopping for a growth diagnostic but the brief is really a margin problem dressed as a demand problem. No budget confirmed. Worth a short paid diagnostic if they can name an owner.',
+  decisions:[{text:'Offer a two-week paid diagnostic rather than a full proposal.',cite:'m5 · 31:02 · Lana Marov'}],
+  objective:'Reframe Northmoor’s demand brief as a margin problem and sell a short paid diagnostic instead of a proposal.',
+  objectiveCite:'08:14 · Lana Marov',
+  gaps:[{q:'Who is the budget owner at Northmoor?',why:'No name or budget was given anywhere in the call.',cite:'not discussed'},
+        {q:'What price goes on the two-week diagnostic?',why:'Lana offered a paid two-week diagnostic; no figure was said aloud.',cite:'31:02 · Lana Marov'}],
+  actions:[{who:'DO',text:'Send the two-week paid diagnostic outline',due:'not stated',src:'31:02 · Lana Marov'}],
+  fields:[{key:'client',val:'Northmoor Retail'},{key:'engagement_stage',val:'Discovery'},{key:'practice',val:'Consulting'},{key:'revenue_mentioned',val:'£24,000 indicative diagnostic'},{key:'risks',val:'No named budget owner; brief mis-framed as demand'},{key:'decision_maker',val:'unconfirmed'},{key:'next_step',val:'Diagnostic outline by 1 Sep'}],
+  lines:[
+   {t:'08:14',k:'DO',text:'You describe it as a demand problem, but everything you have said is about mix and markdown. That is margin.'},
+   {t:'31:02',k:'DO',text:'Let us not write a big proposal. Two weeks, paid, and you get a diagnostic you can act on either way.'}]},
+
+ {id:'m6',title:'Quarterly review',client:'Alcove Foods',practice:'Consulting',dow:'TUE',day:'26',mon:'AUG',time:'13:00',dur:'55 min',dec:2,act:3,people:['MB','TL'],unknown:0,
+  summary:'Year-one results came in at 31% revenue growth against a 25% target. Alcove wants to extend into their food-service channel. Renewal conversation moves to October.',
+  decisions:[{text:'Extend scope into food-service channel from Q1.',cite:'m6 · 27:40 · Marcus Bell'},
+             {text:'Renewal pricing conversation deferred to October.',cite:'m6 · 49:05 · Marcus Bell'}],
+  objective:'Convert a 31% year-one result into a food-service extension without opening renewal pricing today.',
+  objectiveCite:'27:40 · Marcus Bell',
+  gaps:[{q:'When in October is the renewal pricing session?',why:'Marcus deferred it to October without setting a date.',cite:'49:05 · Marcus Bell'}],
+  actions:[{who:'MB',text:'Scope the food-service extension for Q1',due:'not stated',src:'27:40 · Marcus Bell'},
+           {who:'MB',text:'Hold renewal pricing until October',due:'October — no date set',src:'49:05 · Marcus Bell'}],
+  fields:[{key:'client',val:'Alcove Foods'},{key:'engagement_stage',val:'Delivery / renewal'},{key:'practice',val:'Consulting'},{key:'revenue_mentioned',val:'31% year-one revenue growth · renewal TBC'},{key:'risks',val:'Renewal price not yet anchored'},{key:'decision_maker',val:'Marcus Bell (our side)'},{key:'next_step',val:'Extension scope by 12 Sep'}],
+  lines:[
+   {t:'04:30',k:'TL',text:'Thirty-one percent against a twenty-five percent target. The mix shift did more work than the pricing change.'},
+   {t:'27:40',k:'MB',text:'Then we extend into food service from Q1. That is where the same playbook has room.'},
+   {t:'49:05',k:'MB',text:'Renewal pricing we do in October, not today.'}]},
+
+ {id:'m7',title:'Stakeholder interviews',client:'Verdon Health',practice:'Growth iQ',dow:'FRI',day:'22',mon:'AUG',time:'10:30',dur:'44 min',dec:1,act:2,people:['PR','RS'],unknown:1,
+  summary:'Six interviews condensed: the benchmark is used mostly by strategy, not finance, which is why the seat-licence idea keeps coming back. Finance only wants two charts.',
+  decisions:[{text:'Cut the finance section of the benchmark to two charts.',cite:'m7 · 33:15 · Priya Raman'}],
+  objective:'Work out who actually reads the benchmark before reworking it.',
+  objectiveCite:'33:15 · Priya Raman',
+  gaps:[{q:'Which two charts does finance want kept?',why:'Priya said finance reads two charts; the two were not identified on the recording.',cite:'33:15 · Priya Raman'},
+        {q:'Who is the strategy-side reader to design for?',why:'Strategy was named as the real audience, but no individual was.',cite:'33:15 · Priya Raman'}],
+  actions:[{who:'PR',text:'Rework the benchmark for the strategy reader and cut finance to two charts',due:'not stated',src:'33:15 · Priya Raman'}],
+  fields:[{key:'client',val:'Verdon Health'},{key:'engagement_stage',val:'Research'},{key:'practice',val:'Growth iQ'},{key:'revenue_mentioned',val:'—'},{key:'risks',val:'Report audience mismatch with buying centre'},{key:'decision_maker',val:'Ray Sandoval (CFO)'},{key:'next_step',val:'Finance section rework by 28 Aug'}],
+  lines:[
+   {t:'33:15',k:'PR',text:'Finance reads two charts. Strategy reads the whole thing. We have been writing for the wrong reader.'}]},
+
+ {id:'m8',title:'Weekly delivery sync',client:'Hartline Logistics',practice:'Consulting',dow:'THU',day:'21',mon:'AUG',time:'16:00',dur:'31 min',dec:1,act:2,people:['TL','IK'],unknown:1,
+  summary:'Data extract slipped a week because the warehouse system only retains eight weeks of route history. Tom rebaselined the diagnostic on a shorter window.',
+  decisions:[{text:'Rebaseline the diagnostic on an eight-week route window.',cite:'m8 · 12:50 · Tom Lasky'}],
+  objective:'Keep the diagnostic honest inside an eight-week data window.',
+  objectiveCite:'12:50 · Tom Lasky',
+  gaps:[{q:'Does a longer route history exist in an archive?',why:'The eight-week limit was stated as a system retention fact; nobody checked for archives on the call.',cite:'12:50 · Tom Lasky'}],
+  actions:[{who:'TL',text:'Baseline the diagnostic on the eight-week route window',due:'not stated',src:'12:50 · Tom Lasky'}],
+  fields:[{key:'client',val:'Hartline Logistics'},{key:'engagement_stage',val:'Diagnostic'},{key:'practice',val:'Consulting'},{key:'revenue_mentioned',val:'—'},{key:'risks',val:'Route history retention limits rollout baseline'},{key:'decision_maker',val:'Ines Kovač (COO)'},{key:'next_step',val:'Variance rerun by 25 Aug'}],
+  lines:[
+   {t:'12:50',k:'TL',text:'Eight weeks is what the system keeps, so eight weeks is the baseline. I would rather be honest about the window than pretend we have a year.'}]}
+];
+
+const ANSWERS=[
+ {match:['hartline','fee','84','price','pricing'],text:'Hartline phase one is £84,000, invoiced monthly across three months, with phase two scoped only after the Midlands pilot hits a 6% cost-to-serve improvement. Ines Kovač set that gate herself, so the number is safe to repeat back to her.',cites:[{id:'m1',label:'Diagnostic readout · 41:07'},{id:'m8',label:'Weekly sync · 12:50'}]},
+ {match:['decide','decision','decided'],text:'Across the last two weeks: Hartline moved to a phased delivery gated on a depot pilot; Verdon gets a report plus an £18k data addendum instead of a seat licence; Kessler & Roe agreed the programme runs on live client files and that partner review changes alongside it.',cites:[{id:'m1',label:'Hartline · 18:42'},{id:'m2',label:'Verdon · 22:10'},{id:'m4',label:'Kessler · 24:05'}]},
+ {match:['action','owe','owner','who owns','overdue'],text:'Open and owned: Tom has the Hartline pilot scope (Mon 8 Sep) and the depot walkthrough; you have the phased SOW (Tue 9 Sep); Priya owes the Verdon addendum terms (Fri 5 Sep); Nadia has the Kessler curriculum (Thu 4 Sep). Marcus is the only one carrying nothing client-facing this week.',cites:[{id:'m1',label:'Hartline · actions'},{id:'m4',label:'Kessler · actions'}]},
+ {match:['risk','worry','concern'],text:'Two risks repeat across clients. Data retention: Hartline keeps only eight weeks of route history, which caps how confidently you can baseline a national rollout. And behaviour change: Elena Kessler said outright that previous training failed because review practice never changed — the same pattern would sink the Capability programme.',cites:[{id:'m8',label:'Hartline · 12:50'},{id:'m4',label:'Kessler · 51:30'}]},
+ {match:['product','licence','license','data','iq','benchmark'],text:'Three Growth iQ clients asked to license the raw benchmark this quarter — Verdon most explicitly. Marcus flagged it as a product opportunity in Monday ops and owns a one-page scope due 5 Sep. Priya\u2019s position is that the methodology has to travel with the data.',cites:[{id:'m2',label:'Verdon · 44:10'},{id:'m3',label:'Monday ops · 19:40'}]},
+ {match:['capacity','team','busy'],text:'Delivery capacity is the binding constraint, not pipeline. Tom is at 110% once Hartline lands, so you agreed to hold new Consulting proposals for two weeks and pull him off Northmoor discovery.',cites:[{id:'m3',label:'Monday ops · 14:20'}]}
+];
+
+const wave = seed => Array.from({length:32},(_,i)=>({h:(18+Math.abs(Math.sin(seed+i*0.9))*80).toFixed(0)+'%'}));
+
+class Component extends DCLogic {
+  state={
+    theme:this.props.defaultTheme||'light', screen:'library', meetingId:'m1', tab:'summary',
+    query:'', draft:'', chat:[
+      {role:'user',text:'What did we decide about the Hartline timeline?'},
+      {role:'ai',text:'You phased it. Ines Kovač refused a 90-day national programme, so delivery starts with a Midlands depot pilot and national rollout is gated on a 6% cost-to-serve improvement. Tom will be on site two days a week rather than delivering remote.',cites:[{id:'m1',label:'Diagnostic readout · 18:42'},{id:'m1',label:'Diagnostic readout · 52:19'}]}
+    ],
+    thinking:false, recording:false, secs:0, client:null, practice:null,
+    namerOpen:false, namerDraft:'', namerApplyAll:true, namerFor:null,
+    voiceNames:{}, redact:this.props.redactionOn??false, redactNames:false, copied:false,
+    settings:{disclosure:true, autoCal:true, keepAudio:false, sysAudio:true, mic:true, screenRec:true},
+    w:typeof window!=='undefined'?window.innerWidth:1400, railOpen:false, playing:null,
+    me:'lana@maverio.com', accountMenu:false,
+    clientMode:'list', clientSel:null, notesLog:{}, noteDraft:'', noteSaved:false,
+    newClient:{name:'',practice:'Consulting',stage:'Discovery',address:'',phone:'',site:'',notes:''},
+    newContacts:[], ctName:'', ctRole:'', ctEmail:'', ctPhone:'', clientSaved:false,
+    clientData:{
+      'Hartline Logistics':{practice:'Consulting',stage:'Diagnostic → Delivery',address:'Unit 4, Colmore Gate, Birmingham B3 2QD',phone:'+44 121 496 0188',site:'hartline-logistics.co.uk',
+        notes:'Board was told for two years that cost-to-serve was a staffing problem. Ines is the only real decision maker; finance sign-off is a formality if she has a number she set herself.',
+        contacts:[{name:'Ines Kovač',role:'COO — decision maker',email:'i.kovac@hartline-logistics.co.uk',phone:'+44 7700 900112'},
+                  {name:'Sam Petrie',role:'IT / data extracts',email:'s.petrie@hartline-logistics.co.uk',phone:'+44 121 496 0190'}]},
+      'Verdon Health':{practice:'Growth iQ',stage:'Renewal / upsell',address:'12 Marlow Court, Reading RG1 8PB',phone:'+44 118 402 7710',site:'verdonhealth.com',
+        notes:'Finance reads two charts; strategy reads the whole report. Ray buys, but the strategy team drives the ask for raw benchmark data.',
+        contacts:[{name:'Ray Sandoval',role:'CFO — budget holder',email:'r.sandoval@verdonhealth.com',phone:'+44 7700 900431'}]},
+      'Kessler & Roe':{practice:'Capability',stage:'Kickoff / delivery',address:'8 Bedford Row, London WC1R 4BU',phone:'+44 20 7043 1122',site:'kesslerroe.co.uk',
+        notes:'Previous training failed because partner review practice never changed. Elena will judge the programme on whether the review checklist actually shifts.',
+        contacts:[{name:'Elena Kessler',role:'Managing Partner',email:'e.kessler@kesslerroe.co.uk',phone:'+44 7700 900255'}]},
+      'Northmoor Retail':{practice:'Consulting',stage:'Discovery',address:'Northmoor House, Leeds LS1 4AP',phone:'+44 113 288 4402',site:'northmoorretail.co.uk',
+        notes:'Brief is framed as demand but the problem is mix and markdown. No named budget owner yet — do not write a full proposal until there is one.',contacts:[]},
+      'Alcove Foods':{practice:'Consulting',stage:'Delivery / renewal',address:'Alcove Works, Bristol BS2 0QT',phone:'+44 117 325 6640',site:'alcovefoods.com',
+        notes:'Year one delivered 31% against a 25% target. Renewal pricing is deliberately parked until October.',contacts:[]},
+      'Maverio internal':{practice:'Internal',stage:'—',address:'Maverio, 1 Ashwood Yard, London EC2A 3JT',phone:'+44 20 3900 4141',site:'maverio.com',
+        notes:'Internal calls: capacity, pipeline discipline, and the Growth iQ data-product thread.',contacts:[]}
+    },
+    prepTitle:'Pilot scope walkthrough', prepClient:'Hartline Logistics', prepPractice:'Consulting',
+    agenda:['Confirm Midlands depot as the pilot site','Data request: eight-week route history','Walk the 6% cost-to-serve gate','Fee schedule and invoicing dates'],
+    outcomes:['Ines names a finance owner for the pilot budget','Depot walkthrough booked with the ops supervisor'],
+    attendees:['DO','TL','IK'], guests:1, agendaDraft:'', outcomeDraft:'',
+    newMeetings:[], justFinished:null, fieldsOpen:false, gapAnswers:{}, gapDraft:{},
+    titles:{}, editTitle:false, titleDraft:'',
+    fieldEdits:{}, editField:null, fieldDraft:'', fieldSync:null,
+    archived:['Alcove Foods'], archiveOpen:false,
+    inviteEmail:'', inviteRole:'Member', inviteScope:'all', copiedLink:false, inviteSent:false, rowNote:{},
+    team:[
+      {k:'DO',email:'lana@maverio.com',role:'Owner',status:'active',seen:'active now',vp:'enrolled',scope:'all'},
+      {k:'PR',email:'priya@maverio.com',role:'Admin',status:'active',seen:'last call 3 Sep',vp:'enrolled',scope:'all'},
+      {k:'TL',email:'tom@maverio.com',role:'Member',status:'active',seen:'last call 4 Sep',vp:'enrolled',scope:'all'},
+      {k:'NF',email:'nadia@maverio.com',role:'Member',status:'active',seen:'last call 29 Aug',vp:'enrolled',scope:'attended'},
+      {k:'MB',email:'marcus@maverio.com',role:'Admin',status:'active',seen:'last call 3 Sep',vp:'enrolled',scope:'all'},
+      {name:'Ruth Adeyemi',email:'ruth@maverio.com',role:'Member',status:'pending',seen:'invited 5 Sep',vp:'awaiting first call',scope:'attended'}
+    ]
+  };
+
+  componentDidMount(){
+    this.t=setInterval(()=>{ if(this.state.recording) this.setState(s=>({secs:s.secs+1})); },1000);
+    this.onResize=()=>this.setState({w:window.innerWidth});
+    window.addEventListener('resize',this.onResize);
+  }
+  componentWillUnmount(){ clearInterval(this.t); window.removeEventListener('resize',this.onResize); }
+
+  go=(screen)=>this.setState({screen, query: screen==='search'?this.state.query:''});
+
+  stopAndFile=()=>{
+    const s=this.state, d=new Date();
+    const id='n'+Date.now();
+    const mins=Math.max(1,Math.round(s.secs/60));
+    const nm={
+      id, title:s.prepTitle||'Untitled recording', client:s.prepClient||'Unfiled',
+      practice:PR[s.prepPractice]?s.prepPractice:'Internal',
+      dow:d.toLocaleDateString('en-GB',{weekday:'short'}).toUpperCase(),
+      day:String(d.getDate()), mon:d.toLocaleDateString('en-GB',{month:'short'}).toUpperCase(),
+      time:d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),
+      dur:mins+' min', durLabel:hm(mins), dec:0, act:0, people:s.attendees.slice(0,4), unknown:s.guests,
+      fresh:true, stage:'analysing',
+      summary:'Analysing the transcript for decisions, actions and structured fields. The full transcript is ready to read now.',
+      decisions:[], actions:[],
+      fields:[{key:'client',val:s.prepClient||'Unfiled'},{key:'engagement_stage',val:s.prepPractice==='Internal'?'n/a':'in progress'},
+        {key:'practice',val:s.prepPractice},{key:'revenue_mentioned',val:'analysing…'},{key:'risks',val:'analysing…'},
+        {key:'agenda_items',val:s.agenda.join(' · ')||'none set'},{key:'next_step',val:'analysing…'}],
+      lines:this.mockLines(s)
+    };
+    this.setState(p=>({recording:false, secs:0, newMeetings:[nm,...p.newMeetings],
+      screen:'library', query:'', justFinished:id, client:null, practice:null}));
+    setTimeout(()=>this.finishAnalysis(id),9000);
+  };
+
+  mockLines(s){
+    const who=s.attendees.length?s.attendees:['DO'];
+    const guest=s.guests>0?'?1':who[who.length-1];
+    const ag=s.agenda.length?s.agenda:['the scope of the work'];
+    const seq=[
+      {k:who[0], t:'00:00:12', text:'Thanks for making the time. I want to get through '+ag.length+' things today. First on the list: '+ag[0]+'.'},
+      {k:guest, t:'00:01:48', text:'That works. Before we go into it, I should say the board is watching the cost line on this, so anything we commit to needs a number against it.'},
+      {k:who[1]||who[0], t:'00:04:31', text:'Understood. We can hold the first phase tight and only widen it once the numbers hold up — that keeps the exposure small on your side.'},
+      {k:guest, t:'00:09:05', text:'Then let us start there. '+ag[0]+' — I am comfortable with that as the starting point.'},
+      {k:who[0], t:'00:14:22', text:'Good. '+(ag[1]||'The data we need')+' is the next dependency. Without it we are guessing at the baseline.'},
+      {k:who[1]||who[0], t:'00:21:40', text:'I will send the request in writing this week so your team has it in one place rather than over a call.'},
+      {k:guest, t:'00:28:57', text:'Send it to me and I will name someone on my side to own it. I do not want it sitting in a shared inbox.'},
+      {k:who[0], t:'00:36:14', text:'Last one — '+(ag[ag.length-1]||'commercials')+'. I will put that in the follow-up note today so nothing is ambiguous.'},
+      {k:guest, t:'00:41:03', text:'Fine. Get the note over and I will come back with any changes by the end of the week.'}
+    ];
+    return seq.filter(l=>l.k);
+  }
+
+  finishAnalysis=(id)=>{
+    this.setState(p=>({newMeetings:p.newMeetings.map(m=>{
+      if(m.id!==id) return m;
+      const who=m.people, ag=p.agenda;
+      const decisions=[
+        {text:(ag[0]||'The opening scope')+' — agreed as the starting point.',cite:'00:09:05 · unnamed voice'},
+        {text:'Anything committed carries a number against it; the board is watching the cost line.',cite:'00:01:48 · unnamed voice'},
+        {text:'The data request goes over in writing rather than over a call.',cite:'00:21:40 · '+P[who[1]||who[0]].n}
+      ];
+      const actions=[
+        {who:who[1]||who[0], text:'Send the data request in writing', due:'“this week” — no date stated', src:'00:21:40 · '+P[who[1]||who[0]].n},
+        {who:who[0], text:'Send the follow-up note covering '+(ag[ag.length-1]||'commercials').toLowerCase(), due:'today', src:'00:36:14 · '+P[who[0]].n},
+        {who:who[0], text:'Collect the client-side owner’s name once nominated', due:'not stated', src:'00:28:57 · unnamed voice'}
+      ];
+      const gaps=[
+        {q:'Who is the client-side owner of the data request?',why:'They said they would name someone but no name was given on the call.',cite:'00:28:57 · unnamed voice'},
+        {q:'What figure sits against the commitment the board is watching?',why:'A number was demanded for anything committed; none was said aloud.',cite:'00:01:48 · unnamed voice'},
+        {q:'What is the actual deadline behind “this week”?',why:'The data request has no date on the recording.',cite:'00:21:40 · '+P[who[1]||who[0]].n}
+      ];
+      return {...m, stage:'done', dec:decisions.length, act:actions.length, decisions, actions, gaps,
+        objective:'Agree a narrow first step the client can fund without wider commitment.',
+        objectiveCite:'00:04:31 · '+P[who[1]||who[0]].n,
+        summary:'A deliberately narrow start. '+(ag[0]||'The opening scope')+' was agreed as the first step, with any wider commitment gated on the numbers holding up. The client board is watching cost, so every commitment needs a figure attached. The blocking dependency is the data request, which goes over in writing this week against a named owner rather than a shared inbox. Commercials go into the follow-up note today.',
+        fields:m.fields.map(f=>f.val==='analysing…'
+          ? {...f, val:f.key==='revenue_mentioned'?'not discussed':f.key==='risks'?'board scrutiny on cost; baseline data not yet supplied':'follow-up note today, data request this week'}
+          : f)};
+    })}));
+  };
+  pushToClient=(m,key,val)=>{
+    const client=m.client;
+    const stamp=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short'}).toUpperCase();
+    this.setState(p=>{
+      if(!p.clientData[client]) return {fieldSync:{key, client, target:'no client profile — change stays on the meeting only'}};
+      const data={...p.clientData};
+      const rec={...data[client]};
+      let target='client record note';
+      if(key==='engagement_stage'){ rec.stage=val; target='client profile · stage'; }
+      if(key==='practice'&&PR[val]){ rec.practice=val; target='client profile · practice'; }
+      if(key==='decision_maker'){ rec.decisionMaker=val; target='client profile · decision maker'; }
+      data[client]=rec;
+      return {clientData:data,
+        notesLog:{...p.notesLog,[client]:[{meta:stamp+' · FROM '+(p.titles[m.id]||m.title).toUpperCase(),text:key.replace(/_/g,' ')+' updated to “'+val+'”'},...(p.notesLog[client]||[])]},
+        fieldSync:{key, client, target}};
+    });
+    setTimeout(()=>this.setState({fieldSync:null}),4000);
+  };
+  toggleRecord=()=>{ if(this.state.recording) this.stopAndFile(); else this.setState({recording:true,secs:0}); };
+  open=(id)=>{
+    const m=this.state.newMeetings.find(x=>x.id===id);
+    this.setState({screen:'meeting', meetingId:id, tab:m&&m.stage==='analysing'?'transcript':'summary', query:'', justFinished:null, editTitle:false, titleDraft:'', editField:null, fieldDraft:''});
+  };
+
+  ask=(q)=>{
+    if(!q.trim()) return;
+    const found=ANSWERS.find(a=>a.match.some(m=>q.toLowerCase().includes(m)));
+    const a=found||{text:'I could not find that discussed directly. The closest material is the Monday ops call, where capacity and the Growth iQ data-product idea were the live threads.',cites:[{id:'m3',label:'Monday ops · 14:20'}]};
+    this.setState(s=>({chat:[...s.chat,{role:'user',text:q}],draft:'',thinking:true}));
+    setTimeout(()=>this.setState(s=>({thinking:false,chat:[...s.chat,{role:'ai',text:a.text,cites:a.cites}]})),900);
+  };
+
+  speaker(k,mid){
+    if(k[0]==='?'){
+      const named=this.state.voiceNames[k];
+      if(named) return {name:named,color:'#0195BD',conf:'named by you'};
+      return {name:'VOICE '+k.slice(1),color:'#8A9AA3',conf:'92% distinct'};
+    }
+    return {name:P[k].n,color:P[k].c,conf:'voiceprint'};
+  }
+
+  md(m){
+    const r=this.state.redact, rn=this.state.redactNames, fe=this.state.fieldEdits, ti=this.state.titles;
+    m={...m, title:ti[m.id]||m.title, fields:m.fields.map(f=>fe[m.id+'|'+f.key]!==undefined?{...f,val:fe[m.id+'|'+f.key]}:f)};
+    const money = r ? '[redacted]' : null;
+    const keys=[...new Set(m.lines.map(l=>l.k).concat(m.actions.map(a=>a.who)))];
+    const alias={}; keys.forEach((k,i)=>{ alias[this.speaker(k).name]='Speaker '+String.fromCharCode(65+i); });
+    const anon = t => rn ? Object.keys(alias).reduce((acc,n)=>replaceAll(acc,n,alias[n]),t) : t;
+    const f=m.fields.map(x=>'  '+x.key+': "'+(money&&x.key==='revenue_mentioned'?money:anon(x.val))+'"').join('\n');
+    return '---\n'+f+'\n  meeting_id: "'+m.id+'"\n  captured_by: "'+(rn?'[redacted]':'lana@maverio.com')+'"\n  names_redacted: '+(rn?'true':'false')+'\n  duration_min: '+parseInt(m.dur)+'\n---\n\n# '+m.client+' — '+m.title+'\n\n## Key objective\n**'+anon(m.objective||'Not stated on the recording.')+'**'+(m.objectiveCite?'  \n_heard at '+m.objectiveCite+'_':'')+'\n\n## Summary\n'+anon(m.summary)+'\n\n## Decisions\n'+m.dec+' recorded\n'+m.decisions.map(d=>'- '+anon(d.text)+'  \n  _'+anon(d.cite)+'_').join('\n')+'\n\n## Actions\n'+m.actions.map(a=>'- [ ] **'+anon(P[a.who].n)+'** — '+anon(a.text)+' _(due '+a.due+(a.src?' · heard at '+a.src:'')+')_').join('\n')+'\n\n## Not stated on the recording — needs a human answer\n'+((m.gaps&&m.gaps.length)?m.gaps.map(g=>'- '+anon(g.q)+'  \n  _'+anon(g.why)+'_').join('\n'):'- none')+'\n\n## Transcript\n'+m.lines.slice(0,3).map(l=>'**'+anon(this.speaker(l.k).name)+'** ['+l.t+'] '+anon(l.text)+'').join('\n\n')+'\n\n_…'+(m.lines.length-3)+' more turns_\n';
+  }
+
+  renderVals(){
+    const s=this.state, dark=s.theme==='dark';
+    const ALL=[...s.newMeetings,...MEET];
+    const cur=ALL.find(m=>m.id===s.meetingId)||ALL[0];
+    const q=s.query.trim().toLowerCase();
+    const pendingCount=Object.keys(s.voiceNames).length?2:3;
+
+    const decorate=m=>({
+      ...m, title:s.titles[m.id]||m.title, day:m.day, dur:hm(m.dur), stats:m.dec+(m.dec===1?' decision · ':' decisions · ')+m.act+(m.act===1?' action':' actions'),
+      pColor:PR[m.practice].c, pTint:PR[m.practice].t,
+      unknown:m.unknown>0 && !s.voiceNames['?1'],
+      unknownLabel:m.unknown+' unnamed voice'+(m.unknown>1?'s':''),
+      freshDisplay:s.justFinished===m.id?'inline-block':'none',
+      freshLabel:m.stage==='analysing'?'TRANSCRIPT READY':'JUST RECORDED',
+      dec:m.decisions.length, act:m.actions.length,
+      stats:m.stage==='analysing'?'transcript ready · analysing':m.decisions.length+(m.decisions.length===1?' decision · ':' decisions · ')+m.actions.length+(m.actions.length===1?' action':' actions'),
+      border:s.justFinished===m.id?AQ2:'var(--line)',
+      bg:s.justFinished===m.id?'var(--tint)':'var(--panel)',
+      glow:s.justFinished===m.id?'0 0 0 3px rgba(90,195,167,.18)':'none',
+      people:m.people.map(k=>({ini:ini(P[k].n),name:P[k].n.split(' ')[0],color:P[k].c})),
+      open:()=>this.open(m.id)
+    });
+
+    let shown=ALL;
+    if(s.client) shown=shown.filter(m=>m.client===s.client);
+    if(s.practice) shown=shown.filter(m=>m.practice===s.practice);
+
+    const clientList=[...new Set([...Object.keys(s.clientData),...MEET.map(m=>m.client)])].map((c,i)=>({
+      name:c, count:MEET.filter(m=>m.client===c).length,
+      dot:[AQ1,'#7835FE','#FF6A00','#27AC53','#C9A24A'][i%5],
+      archivedNow:s.archived.includes(c),
+      bg:s.client===c?'var(--tint)':'transparent', fg:s.client===c?'var(--ink)':'var(--ink2)',
+      pick:()=>this.setState({client:s.client===c?null:c,screen:'library',query:''}),
+      toggleArchive:()=>this.setState(p=>({archived:p.archived.includes(c)?p.archived.filter(x=>x!==c):[...p.archived,c],
+        archiveOpen:p.archived.includes(c)?p.archiveOpen:true,
+        client:p.client===c?null:p.client}))
+    }));
+
+    const results=[];
+    if(q.length>1){
+      MEET.forEach(m=>m.lines.forEach(l=>{
+        const idx=l.text.toLowerCase().indexOf(q);
+        const sp=this.speaker(l.k);
+        const inName=sp.name.toLowerCase().includes(q)||m.client.toLowerCase().includes(q);
+        if(idx>=0||inName){
+          const at=idx>=0?idx:0;
+          results.push({
+            pre:idx>=0?l.text.slice(Math.max(0,at-70),at):l.text.slice(0,90),
+            hit:idx>=0?l.text.slice(at,at+q.length):'',
+            post:idx>=0?l.text.slice(at+q.length,at+q.length+120)+'…':'…',
+            who:sp.name, ini:ini(sp.name), color:sp.color, at:l.t,
+            meeting:m.client+' · '+m.title, open:()=>this.open(m.id)
+          });
+        }
+      }));
+    }
+
+    const pendingVoices=[
+      {k:'?1',label:'VOICE 1',meta:'4 meetings · Hartline calls',hint:'Speaks after Ines, asks about warehouse systems. Calendar invite lists an unmatched attendee: Sam Petrie, IT.',seed:1.2,
+       suggest:['Sam Petrie','Ines Kovač','Tom Lasky']},
+      {k:'?2',label:'VOICE 2',meta:'1 meeting · Kessler kickoff',hint:'One question about the Manchester office. Invite had two unmatched attendees.',seed:3.4,
+       suggest:['Owen Roe','Claire Adebayo','Elena Kessler']},
+      {k:'?3',label:'VOICE 3',meta:'2 meetings · Northmoor',hint:'Low confidence — may be room audio bleed rather than a distinct speaker.',seed:5.7,
+       suggest:['Northmoor attendee','Room audio','Lana Marov']}
+    ].filter(v=>!s.voiceNames[v.k]);
+
+    const knownVoices=[
+      ...Object.keys(P).map(k=>({name:P[k].n,ini:ini(P[k].n),color:P[k].c,meta:P[k].r,match:'99%'})),
+      ...Object.entries(s.voiceNames).map(([k,n])=>({name:n,ini:ini(n),color:'#0195BD',meta:'named by you · '+k,match:'new'}))
+    ];
+
+    const navDef=[
+      {key:'library',label:'Timeline',icon:'◷'},
+      {key:'prep',label:'Prep a meeting',icon:'✎'},
+      {key:'clients',label:'Clients',icon:'▣'},
+      {key:'voices',label:'Voices',icon:'◍',badge:pendingVoices.length?String(pendingVoices.length):null},
+      {key:'export',label:'Knowledge base',icon:'▤'},
+      {key:'team',label:'Team & seats',icon:'◇',badge:s.team.some(t=>t.status==='pending')?'1':null},
+      {key:'settings',label:'Capture & policy',icon:'◎'}
+    ];
+
+    const narrow=s.w<1120, collapsed=s.w<880, railOpen=narrow?s.railOpen:true;
+    const meRow=s.team.find(t=>t.email===s.me)||s.team[0];
+    const meName=meRow.k?P[meRow.k].n:meRow.name;
+    const isOwner=meRow.role==='Owner', isAdmin=isOwner||meRow.role==='Admin';
+    const note=(email,msg)=>{ this.setState(p=>({rowNote:{...p.rowNote,[email]:msg}}));
+      setTimeout(()=>this.setState(p=>{const r={...p.rowNote};delete r[email];return {rowNote:r};}),1800); };
+
+    return {
+      meName, meIni:ini(meName), meRole:isOwner?'Owner · full control':meRow.role+(meRow.scope==='attended'?' · attended only':' · full library'),
+      meRoleColor:isOwner?AQ2:'var(--ink3)',
+      meAvatarBg:isOwner?'linear-gradient(135deg,#4192B9,#5AC3A7)':(meRow.k?P[meRow.k].c:'#8A9AA3'),
+      accountMenu:s.accountMenu,
+      toggleAccountMenu:()=>this.setState(p=>({accountMenu:!p.accountMenu})),
+      accountLinks:[
+        {label:'Capture & policy',icon:'◎',key:'settings',meta:isOwner?'':'read-only'},
+        {label:'Team & seats',icon:'◇',key:'team',meta:s.team.filter(t=>t.status==='active').length+' seats'},
+        {label:'Clients',icon:'▣',key:'clients',meta:String(Object.keys(s.clientData).length)},
+        {label:'Knowledge base',icon:'▤',key:'export',meta:MEET.length+' files'},
+        {label:'Voices',icon:'◍',key:'voices',meta:''}
+      ].map(a=>({...a, go:()=>this.setState({screen:a.key,query:'',accountMenu:false})})),
+      themeOpts:[{k:'light',label:'Light'},{k:'dark',label:'Dark'}].map(t=>({label:t.label,
+        pick:()=>this.setState({theme:t.k}),
+        bg:s.theme===t.k?'var(--tint)':'transparent', fg:s.theme===t.k?'var(--ink)':'var(--ink2)',
+        border:s.theme===t.k?AQ1:'var(--line)'})),
+      accountList:s.team.filter(t=>t.status==='active').map(t=>{const nm=t.k?P[t.k].n:t.name;
+        return {name:nm, ini:ini(nm), color:t.k?P[t.k].c:'#8A9AA3', role:t.role,
+          bg:s.me===t.email?'var(--tint)':'transparent',
+          pick:()=>this.setState({me:t.email,accountMenu:false})};}),
+      ownerBanner:isOwner
+        ? 'You are the owner. You can promote or demote admins, change any member\u2019s library access, and transfer ownership.'
+        : 'Signed in as '+meName+' ('+meRow.role+'). Only the owner, Lana Marov, can change roles or library access.',
+      ownerBannerBg:isOwner?'var(--tint)':'rgba(255,106,0,.06)',
+      ownerBannerBorder:isOwner?'var(--line2)':'rgba(255,106,0,.3)',
+      ownerBannerDot:isOwner?'linear-gradient(90deg,#4192B9,#5AC3A7)':'#FF6A00',
+      policyIntro:'Capture and retention are owner-controlled and apply to every Maverio account.',
+      policyBanner:isOwner?'You can change every setting here. Changes take effect on all seats at their next launch.':'Read-only for '+meRow.role.toLowerCase()+' accounts — ask Lana Marov to change a policy.',
+      narrow, collapsed, railOpen,
+      sideW:collapsed?'62px':'214px',
+      showLabels:collapsed?'none':'block',
+      navJustify:collapsed?'center':'flex-start',
+      clientsDisplay:collapsed?'none':'flex',
+      railPos:narrow?'absolute':'static',
+      railW:narrow?'min(340px,86%)':'clamp(288px,26%,352px)',
+      railShadow:narrow?'-20px 0 56px rgba(0,0,0,.3)':'none',
+      scrim:narrow&&railOpen,
+      toggleRail:()=>this.setState(p=>({railOpen:!p.railOpen})),
+      railBtnBg:railOpen&&narrow?'var(--tint)':'var(--panel3)',
+      railBtnFg:railOpen&&narrow?'var(--ink)':'var(--ink2)',
+      backDisplay:(()=>{
+        if(s.screen==='meeting'||s.screen==='search') return 'flex';
+        if(s.screen==='clients'&&s.clientMode!=='list') return 'flex';
+        return 'none';})(),
+      chromeTitleDisplay:(s.screen==='meeting'||s.screen==='search'||(s.screen==='clients'&&s.clientMode!=='list'))?'none':'block',
+      backLabel:(()=>{
+        if(s.screen==='meeting') return 'Timeline';
+        if(s.screen==='search') return 'Timeline';
+        if(s.screen==='clients') return s.clientMode==='edit'&&s.clientSel?s.clientSel:'Clients';
+        return 'Back';})(),
+      goBack:()=>{
+        if(s.screen==='clients'){
+          if(s.clientMode==='edit') return this.setState({clientMode:s.clientSel?'detail':'list',clientSaved:false});
+          return this.setState({clientMode:'list',clientSel:null,clientSaved:false});
+        }
+        this.setState({screen:'library',query:''});},
+      theme:s.theme, themeIcon:dark?'☀':'☾', toggleTheme:()=>this.setState({theme:dark?'light':'dark'}),
+      query:s.query, onQuery:e=>this.setState({query:e.target.value, screen:e.target.value.trim()?'search':'library'}),
+
+      recording:s.recording, toggleRecord:this.toggleRecord,
+      recLabel:s.recording?'Recording':'Record', recBg:s.recording?'rgba(255,106,0,.13)':'var(--panel3)',
+      recFg:s.recording?'#FF6A00':'var(--ink)', recDot:s.recording?'#FF6A00':'var(--ink3)',
+      recAnim:s.recording?'recdot 1.3s ease-in-out infinite':'none',
+      elapsed:(s.secs>=3600?Math.floor(s.secs/3600)+'h '+String(Math.floor(s.secs/60)%60).padStart(2,'0')+'m '+String(s.secs%60).padStart(2,'0')+'s':String(Math.floor(s.secs/60)).padStart(2,'0')+':'+String(s.secs%60).padStart(2,'0')),
+      liveSpeakers:(()=>{
+        const roster=[...s.attendees.map(k=>({name:P[k].n.split(' ')[0],ini:ini(P[k].n),color:P[k].c,known:true})),
+          ...Array.from({length:s.guests},(_,i)=>({name:'VOICE '+(i+1),ini:'?',color:'#8A9AA3',known:false}))];
+        const detected=roster.filter((_,i)=>s.secs>=3+i*6);
+        const live=detected.length?Math.floor(s.secs/7)%detected.length:0;
+        return detected.map((p,i)=>({...p,
+          bg:i===live?'rgba(255,255,255,.85)':'rgba(255,255,255,.26)',
+          op:i===live?'1':'.5',
+          chipBg:i===live?'rgba(255,255,255,.16)':'rgba(255,255,255,.06)',
+          chipBorder:i===live?'rgba(255,255,255,.3)':'transparent',
+          nameFg:p.known?(i===live?'#fff':'rgba(255,255,255,.66)'):'#FFB000',
+          bars:[{dur:(i===live?0.62:1.4)+'s',delay:'0s'},{dur:(i===live?0.5:1.6)+'s',delay:'.1s'},{dur:(i===live?0.7:1.3)+'s',delay:'.05s'},{dur:(i===live?0.55:1.5)+'s',delay:'.15s'}]}));
+      })(),
+      pendingVoices:s.secs<3+(s.attendees.length+s.guests-1)*6,
+      pendingLabel:s.secs<3?'listening…':'matching voiceprints…',
+
+      toggleScreenRec:()=>this.setState(p=>({settings:{...p.settings,screenRec:!p.settings.screenRec}})),
+      screenChipLabel:s.settings.screenRec?'Screen':'Audio only',
+      screenTitle:s.settings.screenRec?'Screen is being recorded alongside the audio — click to stop':'Screen capture off — click to record the screen too',
+      screenChipBg:s.settings.screenRec?'rgba(255,106,0,.22)':'rgba(255,255,255,.10)',
+      screenChipFg:s.settings.screenRec?'#FFB000':'rgba(255,255,255,.7)',
+      screenBorder:s.settings.screenRec?'rgba(255,176,0,.5)':'transparent',
+      nav:navDef.map(n=>({...n, go:()=>this.go(n.key),
+        bg:s.screen===n.key?'var(--tint)':'transparent',
+        fg:s.screen===n.key?'var(--ink)':'var(--ink2)'})),
+      clientsActive:clientList.filter(c=>!c.archivedNow),
+      clientsArchived:clientList.filter(c=>c.archivedNow),
+      activeCount:String(clientList.filter(c=>!c.archivedNow).length),
+      archivedCount:String(clientList.filter(c=>c.archivedNow).length),
+      noActiveClients:!clientList.some(c=>!c.archivedNow),
+      noArchivedClients:!clientList.some(c=>c.archivedNow),
+      toggleArchive:()=>this.setState(p=>({archiveOpen:!p.archiveOpen})),
+      archiveChevron:s.archiveOpen?'180deg':'0deg',
+      archiveListDisplay:(collapsed||!s.archiveOpen)?'none':'flex',
+
+      isLibrary:s.screen==='library', isSearch:s.screen==='search', isMeeting:s.screen==='meeting',
+      isVoices:s.screen==='voices', isExport:s.screen==='export', isSettings:s.screen==='settings',
+
+      shownMeetings:shown.map(decorate),
+      resultLine:shown.length+' meetings · '+shown.reduce((a,m)=>a+m.decisions.length,0)+' decisions · '+shown.reduce((a,m)=>a+m.actions.length,0)+' actions captured',
+      practices:['Consulting','Growth iQ','Capability','Internal'].map(p=>({
+        label:p, dot:PR[p].c, pick:()=>this.setState({practice:s.practice===p?null:p,screen:'library',query:''}),
+        bg:s.practice===p?PR[p].t:'transparent', fg:s.practice===p?PR[p].c:'var(--ink2)',
+        border:s.practice===p?PR[p].c:'var(--line)'
+      })),
+      filterActive:!!(s.client||s.practice), clearFilters:()=>this.setState({client:null,practice:null}),
+
+      searchHeading:'“'+s.query+'”', searchSub:results.length+' passages across '+MEET.length+' meetings · matched on transcript, speaker and client',
+      searchResults:results.slice(0,12), noResults:q.length>1&&!results.length,
+
+      cur:{
+        ...cur, title:s.titles[cur.id]||cur.title, pColor:PR[cur.practice].c, pTint:PR[cur.practice].t,
+        metaLine:cur.dow.charAt(0)+cur.dow.slice(1).toLowerCase()+' '+cur.day+' '+cur.mon.charAt(0)+cur.mon.slice(1).toLowerCase()+' · '+cur.time+' · '+hm(cur.dur)+' · captured from system audio + mic'+(s.settings.screenRec?' + screen':''),
+        decisions:cur.decisions,
+        actions:cur.actions.map((a,i)=>({...a, n:String(i+1).padStart(2,'0'),
+          ini:ini(P[a.who].n), color:P[a.who].c, who:P[a.who].n,
+          srcLabel:a.src?'heard at '+a.src:'no source line',
+          dueFg:/not stated|no date/i.test(a.due||'')?'#FF6A00':'var(--ink2)',
+          dueBg:/not stated|no date/i.test(a.due||'')?'rgba(255,106,0,.11)':'var(--panel2)'})),
+        fields:cur.fields.map((f,i)=>{const key=cur.id+'|'+f.key, ov=s.fieldEdits[key], editing=s.editField===key;
+          return {...f, val:ov!==undefined?ov:f.val, bg:i%2?'var(--panel2)':'var(--panel)',
+            edited:ov!==undefined, editing, reading:!editing, draft:s.fieldDraft,
+            start:()=>this.setState({editField:key, fieldDraft:ov!==undefined?ov:f.val}),
+            onDraft:e=>this.setState({fieldDraft:e.target.value}),
+            cancel:()=>this.setState({editField:null, fieldDraft:''}),
+            save:e=>{if(e&&e.preventDefault)e.preventDefault(); const v=this.state.fieldDraft.trim();
+              if(!v) return this.setState({editField:null, fieldDraft:''});
+              this.pushToClient(cur, f.key, v);
+              this.setState(p=>({fieldEdits:{...p.fieldEdits,[key]:v}, editField:null, fieldDraft:''}));}};
+        }),
+        diarLine:cur.people.length+(cur.unknown&&!s.voiceNames['?1']?' known + '+cur.unknown+' unnamed':'')+' speakers separated automatically',
+        hasUnknown:cur.lines.some(l=>l.k[0]==='?'&&!s.voiceNames[l.k]),
+        lines:cur.lines.map((l,i)=>{const sp=this.speaker(l.k), unk=l.k[0]==='?'&&!s.voiceNames[l.k], same=i>0&&cur.lines[i-1].k===l.k;
+          return {t:l.t, text:l.text, who:sp.name, ini:unk?'?':ini(sp.name), color:sp.color, conf:'unnamed voice',
+            nameColor:unk?'#FF6A00':'var(--ink)',
+            nameDisplay:same?'none':'flex', confDisplay:unk?'inline-block':'none',
+            divider:(i===0||same)?'transparent':'var(--line2)'};}),
+        markdown:this.md(cur)
+      },
+      tabs:[{k:'summary',label:'Summary'},{k:'transcript',label:'Transcript'},{k:'export',label:'Markdown for the LLM'}].map(t=>({
+        label:t.label, go:()=>this.setState({tab:t.k}),
+        line:s.tab===t.k?AQ2:'transparent', fg:s.tab===t.k?'var(--ink)':'var(--ink3)'
+      })),
+      toggleFields:()=>this.setState(p=>({fieldsOpen:!p.fieldsOpen})),
+      fieldsDisplay:s.fieldsOpen?'block':'none',
+      fieldsChevron:s.fieldsOpen?'180deg':'0deg',
+      fieldsCount:cur.fields.length+' rows',
+      fieldsHint:s.fieldsOpen?'editable · syncs to the client profile':'show',
+      fieldSyncOn:!!s.fieldSync,
+      fieldSyncLabel:s.fieldSync?('Saved to '+s.fieldSync.client+' → '+s.fieldSync.target):'',
+      goClientFromField:()=>{ if(s.fieldSync) this.setState({screen:'clients',clientMode:'detail',clientSel:s.fieldSync.client,query:''}); },
+      tabSummary:s.tab==='summary', tabTranscript:s.tab==='transcript', tabExport:s.tab==='export',
+      analysing:cur.stage==='analysing',
+      editingTitle:s.editTitle, notEditingTitle:!s.editTitle, titleEdited:!!s.titles[cur.id],
+      titleDraft:s.titleDraft,
+      startEditTitle:()=>this.setState({editTitle:true,titleDraft:s.titles[cur.id]||cur.title}),
+      onTitleDraft:e=>this.setState({titleDraft:e.target.value}),
+      cancelEditTitle:()=>this.setState({editTitle:false,titleDraft:''}),
+      saveTitle:e=>{e.preventDefault(); const v=this.state.titleDraft.trim(); if(!v) return this.setState({editTitle:false});
+        this.setState(p=>({titles:{...p.titles,[cur.id]:v}, editTitle:false, titleDraft:''}));},
+      objective:cur.objective||'No single objective was stated on this recording.',
+      objectiveCite:cur.objectiveCite?'heard at '+cur.objectiveCite:'not stated aloud',
+      actionCount:cur.actions.length+(cur.actions.length===1?' action heard':' actions heard'),
+      hasGaps:!!(cur.gaps&&cur.gaps.length),
+      gapCount:(cur.gaps||[]).length+((cur.gaps||[]).length===1?' question':' questions'),
+      gaps:(cur.gaps||[]).map((g,i)=>{const key=cur.id+'-'+i, ans=s.gapAnswers[key];
+        return {...g, n:String(i+1).padStart(2,'0'), citeLabel:g.cite==='not discussed'?'never discussed on the call':'heard at '+g.cite,
+          answered:!!ans, answer:ans||'', unanswered:!ans,
+          draft:s.gapDraft[key]||'',
+          onDraft:e=>this.setState(p=>({gapDraft:{...p.gapDraft,[key]:e.target.value}})),
+          submit:e=>{e.preventDefault(); const v=(this.state.gapDraft[key]||'').trim(); if(!v) return;
+            this.setState(p=>({gapAnswers:{...p.gapAnswers,[key]:v}, gapDraft:{...p.gapDraft,[key]:''}}));}};
+      }),
+      toggleRedactNames:()=>this.setState({redactNames:!s.redactNames}),
+      redactNamesLabel:s.redactNames?'Names redacted':'Redact names',
+      redactNamesBg:s.redactNames?'rgba(255,106,0,.12)':'var(--panel2)',
+      redactNamesFg:s.redactNames?'#FF6A00':'var(--ink)',
+      redact:s.redact, toggleRedact:()=>this.setState({redact:!s.redact}),
+      redactLabel:s.redact?'Fees redacted':'Redact fees',
+      redactBg:s.redact?'rgba(255,106,0,.12)':'var(--panel2)', redactFg:s.redact?'#FF6A00':'var(--ink)',
+      copyMd:()=>{navigator.clipboard&&navigator.clipboard.writeText(this.md(cur));this.setState({copied:true});setTimeout(()=>this.setState({copied:false}),1600);},
+      copyLabel:s.copied?'Copied ✓':'Copy markdown',
+
+      voiceSub:pendingVoices.length+' voiceprints waiting on a name · '+knownVoices.length+' known · names apply backwards across the whole library',
+      hasPending:pendingVoices.length>0,
+      pending:pendingVoices.map(v=>{const on=s.playing===v.k;return {...v,
+        wave:wave(v.seed).map((w,i)=>({h:w.h, op:on?'1':'.7',
+          anim:on?'lvl '+(0.5+((i*7)%9)/12).toFixed(2)+'s ease-in-out infinite '+((i%6)*0.07).toFixed(2)+'s':'none'})),
+        play:()=>this.setState(p=>({playing:p.playing===v.k?null:v.k})),
+        playIcon:on?'❚❚':'▶', playTitle:on?'Pause sample':'Play a 6-second sample of this voice',
+        playBg:on?'linear-gradient(135deg,#4192B9,#5AC3A7)':'var(--panel3)',
+        playFg:on?'#fff':'var(--ink2)', playBorder:on?'transparent':'var(--line)',
+        playPad:on?'0':'2px', clip:on?'0:02 / 0:06':'0:06 sample',
+        playState:on?'playing':'',
+        name:()=>this.setState({namerOpen:true,namerFor:v,namerDraft:''}),
+        merge:()=>this.setState(p=>({voiceNames:{...p.voiceNames,[v.k]:'Room audio (ignored)'},playing:null}))};}),
+      known:knownVoices,
+
+      namerOpen:s.namerOpen, namerTitle:s.namerFor?s.namerFor.label+' · '+s.namerFor.meta:'',
+      namerHint:s.namerFor?s.namerFor.hint:'', namerWave:wave(s.namerFor?s.namerFor.seed:1),
+      namerSuggestions:(s.namerFor?s.namerFor.suggest:[]).map(n=>({
+        label:n, pick:()=>this.setState({namerDraft:n}),
+        bg:s.namerDraft===n?'var(--tint)':'var(--panel2)', fg:s.namerDraft===n?'var(--ink)':'var(--ink2)',
+        border:s.namerDraft===n?AQ1:'var(--line)'
+      })),
+      namerDraft:s.namerDraft, onNamerDraft:e=>this.setState({namerDraft:e.target.value}),
+      namerApplyAll:s.namerApplyAll, onNamerApplyAll:e=>this.setState({namerApplyAll:e.target.checked}),
+      closeNamer:()=>this.setState({namerOpen:false}),
+      openNamer:()=>{const v=pendingVoices.find(x=>cur.lines.some(l=>l.k===x.k))||pendingVoices[0];this.setState({namerOpen:true,namerFor:v,namerDraft:''});},
+      saveNamer:()=>{const n=s.namerDraft.trim();if(!n||!s.namerFor)return this.setState({namerOpen:false});
+        this.setState(p=>({voiceNames:{...p.voiceNames,[p.namerFor.k]:n},namerOpen:false}));},
+
+      stats:[{n:String(MEET.length),label:'MEETINGS FILED'},{n:'41h',label:'AUDIO CAPTURED'},{n:String(MEET.reduce((a,m)=>a+m.dec,0)),label:'DECISIONS INDEXED'},{n:String(Object.keys(P).length),label:'VOICEPRINTS'}],
+      corpus:MEET.map(m=>({
+        file:m.date||(m.mon.toLowerCase()+'-'+m.day+'-'+m.client.toLowerCase().replace(/[^a-z]+/g,'-')+'.md'),
+        meta:m.title+' · '+m.people.length+' speakers · '+hm(m.dur), practice:m.practice,
+        pColor:PR[m.practice].c, pTint:PR[m.practice].t, size:(6+m.lines.length*1.4).toFixed(1)+' KB',
+        open:()=>{this.setState({screen:'meeting',meetingId:m.id,tab:'export'});}
+      })),
+      goSettings:()=>this.go('settings'),
+
+      isClients:s.screen==='clients',
+      clientModeList:s.clientMode==='list', clientModeForm:s.clientMode==='new'||s.clientMode==='edit', clientModeDetail:s.clientMode==='detail',
+      clientHeading:s.clientMode==='new'?'Add a client':(s.clientMode==='edit'?'Edit '+s.clientSel:(s.clientMode==='detail'?s.clientSel:'Clients')),
+      clientSub:s.clientMode==='new'||s.clientMode==='edit'
+        ? 'Everything here becomes part of the company database — and the people you list get voiceprint slots.'
+        : (s.clientMode==='detail'
+          ? ((s.clientData[s.clientSel]||{}).practice||'')+' · '+((s.clientData[s.clientSel]||{}).stage||'')+' · '+MEET.filter(m=>m.client===s.clientSel).length+' meetings on file'
+          : Object.keys(s.clientData).length+' clients · '+MEET.length+' meetings filed · every contact carries a voiceprint slot'),
+      clientBackDisplay:s.clientMode==='list'?'none':'block',
+      clientAddDisplay:(s.clientMode==='new'||s.clientMode==='edit')?'none':'block',
+      clientEditDisplay:s.clientMode==='detail'?'block':'none',
+      backToClients:()=>this.setState({clientMode:'list',clientSel:null,clientSaved:false}),
+      startEditClient:()=>{const d=s.clientData[s.clientSel]||{};
+        this.setState({clientMode:'edit',clientSaved:false,
+          newClient:{name:s.clientSel,practice:d.practice||'Consulting',stage:d.stage||'Discovery',
+            address:d.address||'',phone:d.phone||'',site:d.site||'',notes:d.notes||''},
+          newContacts:(d.contacts||[]).map(c=>({...c}))});},
+      cancelClientForm:()=>this.setState({clientMode:s.clientSel?'detail':'list',clientSaved:false}),
+      saveIntro:s.clientMode==='edit'
+        ? 'Changes apply everywhere this client appears — the sidebar, the timeline, extracted fields, and the markdown the LLM ingests. People you add here get a voiceprint slot straight away.'
+        : 'The client appears in the sidebar, every future recording can be filed to it, and each person listed here gets a voiceprint slot — so the first time they speak on a call, Recall proposes their name instead of "VOICE 1".',
+      startNewClient:()=>this.setState({clientMode:'new',clientSaved:false,
+        newClient:{name:'',practice:'Consulting',stage:'Discovery',address:'',phone:'',site:'',notes:''},newContacts:[]}),
+      clientCards:Object.keys(s.clientData).filter(n=>!s.archived.includes(n)).map(name=>{const d=s.clientData[name];
+        return {name, practice:d.practice, pColor:PR[d.practice].c, pTint:PR[d.practice].t, stage:d.stage,
+          meetings:String(MEET.filter(m=>m.client===name).length), contactCount:String(d.contacts.length),
+          open:()=>this.setState({clientMode:'detail',clientSel:name})};}),
+      archivedCards:Object.keys(s.clientData).filter(n=>s.archived.includes(n)).map(name=>{const d=s.clientData[name];
+        return {name, practice:d.practice, pColor:PR[d.practice].c, pTint:PR[d.practice].t, stage:d.stage,
+          meetings:String(MEET.filter(m=>m.client===name).length), contactCount:String(d.contacts.length),
+          restore:()=>this.setState(p=>({archived:p.archived.filter(x=>x!==name)})),
+          open:()=>this.setState({clientMode:'detail',clientSel:name})};}),
+      hasArchivedCards:Object.keys(s.clientData).some(n=>s.archived.includes(n)),
+      clientArchiveLabel:s.archived.includes(s.clientSel)?'Restore':'Archive',
+      toggleArchiveSel:()=>{const n=s.clientSel; if(!n) return;
+        this.setState(p=>({archived:p.archived.includes(n)?p.archived.filter(x=>x!==n):[...p.archived,n]}));},
+
+      clientFields:[
+        {key:'name',label:'COMPANY NAME',placeholder:'e.g. Northgate Utilities'},
+        {key:'address',label:'ADDRESS',placeholder:'Street, city, postcode'},
+        {key:'phone',label:'MAIN PHONE',placeholder:'+44 …'},
+        {key:'site',label:'WEBSITE',placeholder:'company.com'}
+      ].map(f=>({...f, value:s.newClient[f.key],
+        set:e=>{const v=e.target.value;this.setState(p=>({newClient:{...p.newClient,[f.key]:v},clientSaved:false}));}})),
+      newNotes:s.newClient.notes,
+      onNewNotes:e=>{const v=e.target.value;this.setState(p=>({newClient:{...p.newClient,notes:v}}));},
+      newPractices:['Consulting','Growth iQ','Capability','Internal'].map(p=>({label:p,dot:PR[p].c,
+        pick:()=>this.setState(x=>({newClient:{...x.newClient,practice:p}})),
+        bg:s.newClient.practice===p?PR[p].t:'transparent', fg:s.newClient.practice===p?PR[p].c:'var(--ink2)',
+        border:s.newClient.practice===p?PR[p].c:'var(--line)'})),
+      newStages:['Discovery','Proposal out','Diagnostic → Delivery','Kickoff / delivery','Renewal / upsell'].map(g=>({label:g,
+        pick:()=>this.setState(x=>({newClient:{...x.newClient,stage:g}})),
+        bg:s.newClient.stage===g?'var(--tint)':'transparent', fg:s.newClient.stage===g?'var(--ink)':'var(--ink2)',
+        border:s.newClient.stage===g?AQ1:'var(--line)'})),
+      newContacts:s.newContacts.map((c,i)=>({...c, ini:ini(c.name), color:['#0195BD','#AC51F6','#88DB0D','#C9A24A'][i%4],
+        line:[c.email,c.phone].filter(Boolean).join(' · ')||'no contact details yet',
+        remove:()=>this.setState(p=>({newContacts:p.newContacts.filter((_,j)=>j!==i)}))})),
+      ctName:s.ctName, onCtName:e=>this.setState({ctName:e.target.value}),
+      ctRole:s.ctRole, onCtRole:e=>this.setState({ctRole:e.target.value}),
+      ctEmail:s.ctEmail, onCtEmail:e=>this.setState({ctEmail:e.target.value}),
+      ctPhone:s.ctPhone, onCtPhone:e=>this.setState({ctPhone:e.target.value}),
+      addContact:e=>{e.preventDefault();const n=s.ctName.trim();if(!n)return;
+        this.setState(p=>({newContacts:[...p.newContacts,{name:n,role:p.ctRole.trim()||'Contact',email:p.ctEmail.trim(),phone:p.ctPhone.trim()}],
+          ctName:'',ctRole:'',ctEmail:'',ctPhone:''}));},
+      saveClientLabel:s.clientSaved?'Client saved ✓':(s.newClient.name.trim()?'Save client':'Add a company name first'),
+      saveClientBg:s.clientSaved?'rgba(39,172,83,.15)':(s.newClient.name.trim()?'linear-gradient(90deg,#4192B9,#5AC3A7)':'var(--panel3)'),
+      saveClientFg:s.clientSaved?'#27AC53':(s.newClient.name.trim()?'#fff':'var(--ink3)'),
+      saveClient:()=>{const n=s.newClient.name.trim();if(!n)return;
+        this.setState(p=>{const data={...p.clientData};
+          if(p.clientMode==='edit'&&p.clientSel&&p.clientSel!==n) delete data[p.clientSel];
+          data[n]={...p.newClient,name:undefined,contacts:p.newContacts};
+          return {clientData:data, clientSel:n, clientSaved:true};});
+        setTimeout(()=>this.setState({clientMode:'detail',clientSaved:false}),700);},
+
+      detailFacts:(()=>{const d=s.clientData[s.clientSel]||{}, ms=MEET.filter(m=>m.client===s.clientSel);
+        return [
+          {k:'practice',v:d.practice||'—'},{k:'stage',v:d.stage||'—'},
+          ...(d.decisionMaker?[{k:'decision maker',v:d.decisionMaker}]:[]),
+          {k:'address',v:d.address||'not recorded'},{k:'phone',v:d.phone||'not recorded'},
+          {k:'website',v:d.site||'not recorded'},
+          {k:'last meeting',v:ms.length?ms[0].title+' · '+ms[0].day+' '+ms[0].mon:'none yet'}
+        ].map((f,i)=>({...f,bg:i%2?'var(--panel2)':'var(--panel)'}));})(),
+      detailNotes:(()=>{const base=(s.clientData[s.clientSel]||{}).notes;
+        const log=(s.notesLog[s.clientSel]||[]);
+        const all=[...log, ...(base?[{meta:'CLIENT RECORD',text:base}]:[])];
+        if(!all.length) all.push({meta:'NO NOTES YET',text:'Nothing recorded for this client. Add the first note below.'});
+        return all.map((n,i)=>({...n, divider:i===all.length-1?'transparent':'var(--line2)'}));})(),
+      noteCount:(()=>{const n=(s.notesLog[s.clientSel]||[]).length+((s.clientData[s.clientSel]||{}).notes?1:0);
+        return n+(n===1?' note':' notes')+' · scrolls';})(),
+      noteDraft:s.noteDraft, onNoteDraft:e=>this.setState({noteDraft:e.target.value}),
+      noteBtnLabel:s.noteSaved?'Note added ✓':'Add note',
+      noteBtnBg:s.noteSaved?'rgba(39,172,83,.15)':(s.noteDraft.trim()?'linear-gradient(90deg,#4192B9,#5AC3A7)':'var(--panel3)'),
+      noteBtnFg:s.noteSaved?'#27AC53':(s.noteDraft.trim()?'#fff':'var(--ink3)'),
+      addNote:e=>{e.preventDefault();const v=s.noteDraft.trim();if(!v)return;
+        const stamp=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short'}).toUpperCase();
+        this.setState(p=>({notesLog:{...p.notesLog,[p.clientSel]:[{meta:stamp+' · '+meName.toUpperCase(),text:v},...(p.notesLog[p.clientSel]||[])]},
+          noteDraft:'', noteSaved:true}));
+        setTimeout(()=>this.setState({noteSaved:false}),1600);},
+      detailContacts:((s.clientData[s.clientSel]||{}).contacts||[]).map((c,i)=>{
+        const known=Object.values(P).some(p=>p.n===c.name);
+        return {...c, ini:ini(c.name), color:['#0195BD','#AC51F6','#88DB0D','#C9A24A'][i%4],
+          line:[c.email,c.phone].filter(Boolean).join(' · ')||'no contact details',
+          vp:known?'voiceprint':'slot reserved',
+          vpColor:known?'#27AC53':'var(--ink3)', vpTint:known?'rgba(39,172,83,.12)':'var(--panel3)'};}),
+      detailMeetings:MEET.filter(m=>m.client===s.clientSel).map(m=>({title:m.title,
+        meta:m.dec+(m.dec===1?' decision · ':' decisions · ')+m.act+(m.act===1?' action':' actions')+' · '+hm(m.dur),
+        date:m.day+' '+m.mon, open:()=>this.open(m.id)})),
+
+      isPrep:s.screen==='prep',
+      prepTitle:s.prepTitle, onPrepTitle:e=>this.setState({prepTitle:e.target.value}),
+      prepClient:s.prepClient, onPrepClient:e=>this.setState({prepClient:e.target.value}),
+      prepPractices:['Consulting','Growth iQ','Capability','Internal'].map(p=>({label:p, dot:PR[p].c,
+        pick:()=>this.setState({prepPractice:p}),
+        bg:s.prepPractice===p?PR[p].t:'transparent', fg:s.prepPractice===p?PR[p].c:'var(--ink2)',
+        border:s.prepPractice===p?PR[p].c:'var(--line)'})),
+      agenda:s.agenda.map((text,i)=>({text, n:String(i+1).padStart(2,'0'),
+        remove:()=>this.setState(p=>({agenda:p.agenda.filter((_,j)=>j!==i)}))})),
+      agendaDraft:s.agendaDraft, onAgendaDraft:e=>this.setState({agendaDraft:e.target.value}),
+      addAgenda:e=>{e.preventDefault();const v=s.agendaDraft.trim();if(!v)return;
+        this.setState(p=>({agenda:[...p.agenda,v],agendaDraft:''}));},
+      outcomes:s.outcomes.map((text,i)=>({text,
+        remove:()=>this.setState(p=>({outcomes:p.outcomes.filter((_,j)=>j!==i)}))})),
+      outcomeDraft:s.outcomeDraft, onOutcomeDraft:e=>this.setState({outcomeDraft:e.target.value}),
+      addOutcome:e=>{e.preventDefault();const v=s.outcomeDraft.trim();if(!v)return;
+        this.setState(p=>({outcomes:[...p.outcomes,v],outcomeDraft:''}));},
+      voicePicks:Object.keys(P).map(k=>{const on=s.attendees.includes(k);
+        return {name:P[k].n.split(' ')[0], ini:ini(P[k].n), color:P[k].c, role:P[k].r,
+          toggle:()=>this.setState(p=>({attendees:on?p.attendees.filter(x=>x!==k):[...p.attendees,k]})),
+          bg:on?'var(--tint)':'transparent', fg:on?'var(--ink)':'var(--ink2)', border:on?AQ1:'var(--line)'};}),
+      guests:Array.from({length:s.guests},(_,i)=>({label:'Expected guest '+(i+1),
+        remove:()=>this.setState(p=>({guests:Math.max(0,p.guests-1)}))})),
+      addGuest:()=>this.setState(p=>({guests:p.guests+1})),
+      attendeeCount:(s.attendees.length+s.guests)+' voices · '+s.attendees.length+' known',
+      briefTitle:(s.prepTitle||'Untitled meeting')+' · '+s.prepClient,
+      brief:[
+        {k:'capture',v:'System audio + microphone'+(s.settings.screenRec?' + screen recording':'')+' · no plugin, no bot in the call'},
+        {k:'expecting',v:s.attendees.length+' known voiceprints'+(s.guests?' + '+s.guests+' reserved slot'+(s.guests>1?'s':''):'')},
+        {k:'agenda',v:s.agenda.length+' item'+(s.agenda.length===1?'':'s')+' → chapter markers'},
+        {k:'outcomes',v:s.outcomes.length+' to verify against decisions'},
+        {k:'files to',v:s.prepClient+' · '+s.prepPractice},
+        {k:'retention',v:s.settings.keepAudio?'audio kept · transcript forever':'audio 30 days · transcript forever'}
+      ],
+      armMeeting:this.toggleRecord,
+      armLabel:s.recording?'Recording — stop from the pill':'Arm & start recording',
+      armBg:s.recording?'rgba(255,106,0,.14)':'linear-gradient(90deg,#4192B9,#5AC3A7)',
+      armFg:s.recording?'#FF6A00':'#fff',
+      discloseDisplay:s.settings.disclosure?'block':'none',
+
+      isTeam:s.screen==='team',
+      seatLine:(()=>{const p=s.team.filter(t=>t.status==='pending').length;
+        return s.team.filter(t=>t.status==='active').length+' of 8 seats in use · '+p+(p===1?' invite':' invites')+' pending · workspace locked to @maverio.com';})(),
+      inviteLink:'recall.maverio.com/join/mv-8f2c41',
+      copyLink:()=>{navigator.clipboard&&navigator.clipboard.writeText('https://recall.maverio.com/join/mv-8f2c41');this.setState({copiedLink:true});setTimeout(()=>this.setState({copiedLink:false}),1600);},
+      copyLinkLabel:s.copiedLink?'Copied ✓':'Copy install link',
+      inviteEmail:s.inviteEmail, onInviteEmail:e=>this.setState({inviteEmail:e.target.value,inviteSent:false}),
+      inviteBorder:s.inviteEmail&&!/@maverio\.com$/i.test(s.inviteEmail.trim())?'#FF6A00':'var(--line)',
+      inviteHelp:!isAdmin
+        ? 'Only the owner and admins can invite. Ask Lana Marov to add a seat.'
+        : (s.inviteEmail&&!/@maverio\.com$/i.test(s.inviteEmail.trim())
+          ? 'Outside addresses cannot be invited — the library is company-only.'
+          : 'They get the install link by email, sign in with their Maverio account, and their voiceprint enrolls on their first recorded call.'),
+      inviteBtnLabel:s.inviteSent?'Invite sent ✓':'Send invite',
+      inviteBtnBg:s.inviteSent?'rgba(39,172,83,.14)':'linear-gradient(90deg,#4192B9,#5AC3A7)',
+      inviteBtnFg:s.inviteSent?'#27AC53':'#fff',
+      scopes:[{k:'all',label:'Full library'},{k:'attended',label:'Attended only'}].map(c=>({
+        label:c.label, pick:()=>this.setState({inviteScope:c.k}),
+        bg:s.inviteScope===c.k?'var(--tint)':'transparent', fg:s.inviteScope===c.k?'var(--ink)':'var(--ink2)',
+        border:s.inviteScope===c.k?AQ1:'var(--line)'})),
+      roles:['Member','Admin'].map(r=>({label:r, pick:()=>this.setState({inviteRole:r}),
+        bg:s.inviteRole===r?'var(--tint)':'transparent', fg:s.inviteRole===r?'var(--ink)':'var(--ink2)',
+        border:s.inviteRole===r?AQ1:'var(--line)'})),
+      onInvite:e=>{e.preventDefault();const em=s.inviteEmail.trim();
+        if(!isAdmin||!/@maverio\.com$/i.test(em))return;
+        const nm=em.split('@')[0].split(/[._-]/).map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' ');
+        this.setState(p=>({team:[...p.team,{name:nm,email:em,role:p.inviteRole,status:'pending',seen:'invited just now',vp:'awaiting first call',scope:p.inviteScope}],inviteEmail:'',inviteSent:true}));
+        setTimeout(()=>this.setState({inviteSent:false}),2200);},
+      team:s.team.map(t=>{const nm=t.k?P[t.k].n:t.name, pend=t.status==='pending', owner=t.role==='Owner';
+        return {name:nm, ini:ini(nm), email:t.email, seen:t.seen,
+          role:owner?'Owner · master admin':(pend?'Invited · '+t.role:t.role),
+          color:t.k?P[t.k].c:'#8A9AA3', rowBg:pend?'var(--panel2)':'var(--panel)',
+          roleColor:owner?'#fff':(pend?'#FF6A00':(t.role==='Admin'?AQ1:'var(--ink3)')),
+          roleTint:owner?'linear-gradient(90deg,#4192B9,#5AC3A7)':(pend?'rgba(255,106,0,.12)':(t.role==='Admin'?'var(--tint)':'var(--panel3)')),
+          scopeOpacity:(owner||!isOwner)?'.5':'1',
+          scopeOpts:[{k:'all',label:'Full library'},{k:'attended',label:'Attended only'}].map(o=>({
+            label:o.label, title:owner?'The owner always has full access':(o.k==='all'?'Reads every meeting ever recorded':'Only meetings this voiceprint appears in'),
+            bg:t.scope===o.k?'var(--tint)':'transparent', fg:t.scope===o.k?'var(--ink)':'var(--ink3)',
+            pick:()=>{
+              if(owner) return note(t.email,'Owner keeps full access');
+              if(!isOwner) return note(t.email,'Owner only');
+              this.setState(p=>({team:p.team.map(x=>x.email===t.email?{...x,scope:o.k}:x)}));
+              note(t.email,o.k==='all'?'Full access ✓':'Attended only ✓');}
+          })),
+          voiceprint:t.vp, vpColor:t.vp==='enrolled'?'#27AC53':'var(--ink3)',
+          vpTint:t.vp==='enrolled'?'rgba(39,172,83,.12)':'var(--panel3)',
+          actLabel:s.rowNote[t.email] || (owner?'Transfer ownership':(pend?'Resend':(t.role==='Admin'?'Make member':'Make admin'))),
+          act:()=>{
+            if(owner) return note(t.email, isOwner?'Pick a member below':'Owner only');
+            if(pend) return isAdmin?note(t.email,'Resent ✓'):note(t.email,'Admins only');
+            if(!isOwner) return note(t.email,'Owner only');
+            const next=t.role==='Admin'?'Member':'Admin';
+            this.setState(p=>({team:p.team.map(x=>x.email===t.email?{...x,role:next}:x)}));
+            note(t.email,'Now '+next.toLowerCase()+' ✓');
+          }};}),
+
+      settings:[
+        {k:'disclosure',label:'Disclosure prompt before recording',help:'Shows you a one-line script to read at the top of the call. Required in all-party-consent jurisdictions.'},
+        {k:'autoCal',label:'Arm automatically for calendar meetings',help:'Recall pre-arms when a meeting starts. You still press record — nothing captures itself.'},
+        {k:'sysAudio',label:'Capture system audio',help:'Records the Mac output — works with any conferencing tool, no plugin or bot in the call.'},
+        {k:'screenRec',label:'Record the screen at the same time',help:'Captures the shared window alongside the audio, so slides and spreadsheets are attached to the transcript. Nothing appears in the call and no participant is notified by Recall.'},
+        {k:'mic',label:'Capture microphone',help:'Your side of the conversation, separated as its own track for cleaner diarisation.'},
+        {k:'keepAudio',label:'Keep raw audio beyond 30 days',help:'Off by default. Transcripts and structured fields are retained indefinitely for the knowledge base.'}
+      ].map(x=>({...x,
+        toggle:()=>{ if(!isOwner) return; this.setState(p=>({settings:{...p.settings,[x.k]:!p.settings[x.k]}})); },
+        title:isOwner?'':'Only the owner can change this',
+        opacity:isOwner?'1':'.45', cursor:isOwner?'pointer':'not-allowed',
+        lockDisplay:isOwner?'none':'inline-block',
+        track:s.settings[x.k]?'linear-gradient(90deg,'+AQ1+','+AQ2+')':'var(--panel3)',
+        knob:s.settings[x.k]?'22px':'3px'})),
+
+      chat:s.chat.map(c=>({
+        tag:c.role==='user'?'YOU':'RECALL', tagColor:c.role==='user'?'var(--ink3)':AQ2,
+        text:c.text, fg:c.role==='user'?'var(--ink)':'var(--ink2)',
+        bg:c.role==='user'?'var(--panel)':'transparent',
+        border:c.role==='user'?'var(--line)':'transparent',
+        hasCites:!!(c.cites&&c.cites.length),
+        cites:(c.cites||[]).map(x=>({label:x.label,dot:PR[(MEET.find(m=>m.id===x.id)||MEET[0]).practice].c,open:()=>this.open(x.id)}))
+      })),
+      thinking:s.thinking,
+      askScope:s.screen==='meeting'?'Scoped to this meeting · switch to all 8 anytime':'All 8 meetings · 5 accounts · answers cite their source',
+      prompts:[
+        {label:'What did we decide?',q:'What did we decide recently?'},
+        {label:'Who owns what?',q:'Who owns what actions right now?'},
+        {label:'Risks across clients',q:'What risks keep coming up?'},
+        {label:'Hartline fee',q:'What is the Hartline fee?'}
+      ].map(p=>({label:p.label, ask:()=>this.ask(p.q)})),
+      draft:s.draft, onDraft:e=>this.setState({draft:e.target.value}),
+      onSubmitAsk:e=>{e.preventDefault();this.ask(s.draft);},
+      backToLibrary:()=>this.go('library')
+    };
+  }
+}
+
+</script>
+</body>
+</html>
