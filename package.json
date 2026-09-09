@@ -1,0 +1,60 @@
+{
+  "name": "maverio-recall",
+  "productName": "Maverio Recall",
+  "version": "0.1.0",
+  "description": "Maverio Recall — meeting capture, voice ID and a searchable knowledge base for Maverio.",
+  "main": "electron/main.cjs",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "dev:electron": "concurrently -k \"vite\" \"wait-on tcp:5173 && electron .\"",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "electron": "electron .",
+    "dist": "npm run build && electron-builder",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "concurrently": "^9.1.0",
+    "electron": "^44.3.0",
+    "electron-builder": "^26.15.3",
+    "playwright-core": "^1.63.0",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.3",
+    "vitest": "^5.0.0",
+    "wait-on": "^8.0.1"
+  },
+  "build": {
+    "appId": "com.maverio.recall",
+    "productName": "Maverio Recall",
+    "files": [
+      "dist/**",
+      "electron/**"
+    ],
+    "protocols": {
+      "name": "Maverio Recall invite/reset link",
+      "schemes": [
+        "maveriorecall"
+      ]
+    },
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": "dmg",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist",
+      "extendInfo": {
+        "NSMicrophoneUsageDescription": "Maverio Recall needs microphone access to capture your side of the conversation during a meeting recording."
+      }
+    }
+  }
+}
