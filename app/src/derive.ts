@@ -124,7 +124,10 @@ export function buildView(s: AppState, methods: Methods) {
       border: s.justFinished === m.id ? AQ2 : 'var(--line)',
       bg: s.justFinished === m.id ? 'var(--tint)' : 'var(--panel)',
       glow: s.justFinished === m.id ? '0 0 0 3px rgba(90,195,167,.18)' : 'none',
-      people: m.people.map((k) => ({ ini: ini(asPerson(k).n), name: asPerson(k).n.split(' ')[0], color: asPerson(k).c })),
+      people: m.people.map((k) => {
+        const sp = speaker(k);
+        return { ini: ini(sp.name), name: k[0] === '?' ? sp.name : sp.name.split(' ')[0], color: sp.color };
+      }),
       open: () => open(m.id)
     };
   };
@@ -503,9 +506,9 @@ export function buildView(s: AppState, methods: Methods) {
         actions: cur.actions.map((a, i) => ({
           ...a,
           n: String(i + 1).padStart(2, '0'),
-          ini: ini(asPerson(a.who).n),
-          color: asPerson(a.who).c,
-          who: asPerson(a.who).n,
+          ini: ini(speaker(a.who).name),
+          color: speaker(a.who).color,
+          who: speaker(a.who).name,
           srcLabel: a.src ? 'heard at ' + a.src : 'no source line',
           dueFg: /not stated|no date/i.test(a.due || '') ? '#FF6A00' : 'var(--ink2)',
           dueBg: /not stated|no date/i.test(a.due || '') ? 'rgba(255,106,0,.11)' : 'var(--panel2)'

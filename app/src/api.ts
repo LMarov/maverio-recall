@@ -189,3 +189,8 @@ export async function uploadAudio(
   form.append('durationSeconds', String(meta.durationSeconds));
   return request<{ meetingId: string }>('/audio', { method: 'POST', body: form });
 }
+
+// ---- ask ----
+export const askApi = {
+  ask: (question: string, meetingId?: string) => post<{ text: string; citations: { id: string; label: string }[] }>('/ask', { question, meetingId })
+};

@@ -6,8 +6,8 @@ import type { AppState, NamerTarget, StatePatch } from './types';
 import { buildView } from './derive';
 import { loadPersisted, savePersisted } from './persistence';
 import { startRecording, type ActiveRecording } from './capture';
-import { authApi, clientsApi, meetingsApi, scheduledApi, setAuthToken, teamApi, uploadAudio } from './api';
-import { mapClients, mapMeeting, mapScheduled, mapTeam } from './sync';
+import { askApi, authApi, clientsApi, meetingsApi, scheduledApi, setAuthToken, teamApi, uploadAudio } from './api';
+import { mapClients, mapMeeting, mapScheduled, mapTeam, scopeSpeakerKey } from './sync';
 import { connectRealtime, disconnectRealtime, onRealtimeEvent } from './realtime';
 
 export function useApp() {
@@ -369,7 +369,7 @@ export function useApp() {
         objective: analysis.objective,
         objectiveCite: analysis.objectiveCite,
         decisions: analysis.decisions,
-        actions: analysis.actions,
+        actions: analysis.actions.map((a) => ({ ...a, who: scopeSpeakerKey(id, a.who) })),
         gaps: analysis.gaps,
         fields: m.fields.map((f) => (analysis.fields && f.key in analysis.fields ? { ...f, val: analysis.fields[f.key] } : f))
       }));
@@ -413,14 +413,30 @@ export function useApp() {
 
   const ask = (q: string) => {
     if (!q.trim()) return;
+    const s = stateRef.current;
+    patch((p) => ({ chat: [...p.chat, { role: 'user' as const, text: q }], draft: '', thinking: true }));
+
+    if (s.authToken) {
+      const meetingId = s.screen === 'meeting' ? s.meetingId : undefined;
+      askApi
+        .ask(q, meetingId)
+        .then(({ text, citations }) => {
+          patch((p) => ({ thinking: false, chat: [...p.chat, { role: 'ai' as const, text, cites: citations }] }));
+        })
+        .catch((e) => {
+          const message = e instanceof Error ? e.message : String(e);
+          patch((p) => ({ thinking: false, chat: [...p.chat, { role: 'ai' as const, text: 'Could not reach the search — ' + message }] }));
+        });
+      return;
+    }
+
     const found = ANSWERS.find((a) => a.match.some((m) => q.toLowerCase().includes(m)));
     const a = found || {
       text: 'I could not find that discussed directly. The closest material is the Monday ops call, where capacity and the Growth iQ data-product idea were the live threads.',
       cites: [{ id: 'm3', label: 'Monday ops · 14:20' }]
     };
-    patch((s) => ({ chat: [...s.chat, { role: 'user' as const, text: q }], draft: '', thinking: true }));
     setTimeout(() => {
-      patch((s) => ({ thinking: false, chat: [...s.chat, { role: 'ai' as const, text: a.text, cites: a.cites }] }));
+      patch((p) => ({ thinking: false, chat: [...p.chat, { role: 'ai' as const, text: a.text, cites: a.cites }] }));
     }, 900);
   };
 
@@ -479,7 +495,7 @@ export function useApp() {
       ' recorded\n' +
       m.decisions.map((d) => '- ' + anon(d.text) + '  \n  _' + anon(d.cite) + '_').join('\n') +
       '\n\n## Actions\n' +
-      m.actions.map((a) => '- [ ] **' + anon(P[a.who as PersonKey].n) + '** — ' + anon(a.text) + ' _(due ' + a.due + (a.src ? ' · heard at ' + a.src : '') + ')_').join('\n') +
+      m.actions.map((a) => '- [ ] **' + anon(speaker(a.who).name) + '** — ' + anon(a.text) + ' _(due ' + a.due + (a.src ? ' · heard at ' + a.src : '') + ')_').join('\n') +
       '\n\n## Not stated on the recording — needs a human answer\n' +
       (m.gaps && m.gaps.length ? m.gaps.map((g) => '- ' + anon(g.q) + '  \n  _' + anon(g.why) + '_').join('\n') : '- none') +
       '\n\n## Transcript\n' +

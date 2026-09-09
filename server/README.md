@@ -19,6 +19,14 @@ into and shares.
 - **Realtime** — a websocket (`src/realtime/hub.ts`) pushes every change
   (new meeting, stage change, publish, a new client, a scheduled meeting,
   a teammate joining) to every signed-in client instantly.
+- **Ask** — `POST /ask` (`src/routes/ask.ts`, `src/pipeline/ask.ts`) answers
+  a free-text question about the team's meetings. It hands Claude the
+  relevant meeting content (summary/objective/decisions/actions/gaps for
+  every meeting, or one meeting's full transcript when the question is
+  scoped to it) with the same "use only what's given" grounding as the
+  analysis pipeline, and returns an answer plus citations back to the
+  source meeting(s). Same API-key-stays-server-side rule as the rest of the
+  pipeline.
 
 ## Setup
 
@@ -72,12 +80,12 @@ npm run build && npm run dev:electron
 - `src/db/` — Postgres pool, a tiny SQL-file migration runner, the seed script.
 - `src/auth/` — password hashing, JWT sign/verify, the `requireAuth` middleware.
 - `src/routes/` — one file per resource (`auth`, `team`, `clients`,
-  `meetings`, `scheduled`, `audio`).
+  `meetings`, `scheduled`, `audio`, `ask`).
 - `src/storage/` — the object-storage abstraction (`s3.ts` / `local.ts`)
   behind a single `StorageAdapter` interface.
 - `src/pipeline/` — `transcribe.ts` (Deepgram), `analyze.ts` (Claude),
   `process.ts` (orchestrates the two after an upload and broadcasts the
-  result).
+  result), `ask.ts` (answers a question grounded in the team's meetings).
 - `src/realtime/hub.ts` — the websocket connection registry + `broadcast()`.
 - `src/util/` — small shared helpers (async route wrapper, audit log writer).
 
@@ -91,3 +99,8 @@ npm run build && npm run dev:electron
 - The retention policy mentioned in the Knowledge base UI copy (30-day audio
   retention) isn't enforced by a cron job yet — the audit log table exists
   but nothing reads it back into a UI.
+- `/ask` has no real retrieval — it hands Claude the 50 most recent
+  meetings' summaries (or one full meeting when scoped) rather than
+  ranking/searching for the most relevant ones. Fine at the volume a team
+  produces today; will need real full-text or vector search once there are
+  hundreds of meetings.

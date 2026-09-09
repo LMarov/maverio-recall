@@ -11,6 +11,7 @@ import { clientsRouter } from './routes/clients';
 import { meetingsRouter } from './routes/meetings';
 import { scheduledRouter } from './routes/scheduled';
 import { audioRouter } from './routes/audio';
+import { askRouter } from './routes/ask';
 import { initRealtime } from './realtime/hub';
 
 const app = express();
@@ -25,6 +26,7 @@ app.use('/clients', clientsRouter);
 app.use('/meetings', meetingsRouter);
 app.use('/scheduled', scheduledRouter);
 app.use('/audio', audioRouter);
+app.use('/ask', askRouter);
 
 if (env.storageDriver === 'local') {
   app.use('/audio-files', express.static(path.resolve(env.localStorageDir)));

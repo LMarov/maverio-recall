@@ -62,7 +62,7 @@ npm run build   # type-check + Vite production build -> dist/
 npm run dist    # build + package a macOS app with electron-builder
 ```
 
-## What's real vs. still mocked (Phase 2)
+## What's real vs. still mocked (Phase 3)
 
 **Real, shared across the team via the server:**
 - Sign-in (email + password), invite-a-colleague, domain-gated to
@@ -75,21 +75,33 @@ npm run dist    # build + package a macOS app with electron-builder
   uploaded to the server, which runs transcription (Deepgram) + AI analysis
   (Claude) and pushes the result back over the websocket — no API keys or
   AI calls happen on the desktop machine anymore
+- **The Ask rail** — `ask()` in `src/useApp.ts` calls the server's `/ask`
+  endpoint, which grounds Claude's answer in the team's actual meetings
+  (summaries, decisions, actions, gaps, and — when the question is scoped to
+  one meeting — the full transcript) and returns real citations back to the
+  source meeting. No more canned answer bank once signed in.
 - A brand-new team's workspace starts genuinely empty (no seed meetings) —
-  the Timeline/Knowledge base/etc. all handle the zero-data state gracefully
+  the Timeline/Knowledge base/Ask rail all handle the zero-data state gracefully
 
 **Still mocked / not yet built:**
 - **No cross-meeting voice recognition.** Deepgram diarizes speakers within
   one recording; naming a speaker only applies to that one meeting (unlike
-  the demo's "?1 recurs across 4 Hartline calls" voiceprint fiction)
+  the demo's "?1 recurs across 4 Hartline calls" voiceprint fiction). Every
+  unnamed speaker Deepgram/Claude produce — transcript line keys and each
+  action's "who" — is normalized to the same meeting-scoped key
+  (`src/sync.ts`'s `scopeSpeakerKey`) so they render consistently and never
+  collide with an unrelated meeting's "Speaker 0", but the identities
+  themselves still don't carry across recordings.
 - Simultaneous screen recording (removed from the UI as not implemented)
-- The Ask rail's Q&A is still a canned local answer bank
-  (`src/data.ts`'s `ANSWERS`), not a real search over the team's meetings
 - Attendee/team-member "voiceprint" identity is still the fixed 8-person
   mock roster (`P` in `src/data.ts`) for the Prep screen's attendee chips;
   a real team's invited members don't get a matching avatar/color slot there
 - Invite links are a raw code the inviter copies and sends manually (no
   email delivery, no `recall.maverio.com/join/...` deep link yet)
+- Ask search has no real ranking/retrieval — it hands the server's 50 most
+  recent meetings' summaries to Claude (or one full meeting when scoped).
+  Fine for a team's real-world volume today; will need actual retrieval
+  (full-text or vector search) once a team has hundreds of meetings.
 
 ## Structure
 
@@ -99,13 +111,16 @@ npm run dist    # build + package a macOS app with electron-builder
   `electron/ai.cjs`) are unused now that the server does all of that, and
   are kept only as a reference for the Phase 1 local-only pipeline.
 - `src/api.ts` — REST client for the server (`../server`): auth, team,
-  clients, meetings, scheduled meetings, audio upload. The only place a
+  clients, meetings, scheduled meetings, audio upload, ask. The only place a
   network request is made.
 - `src/realtime.ts` — websocket client; subscribes to live events
   (`meeting.*`, `client.updated`, `scheduled.*`, `team.*`) from the server.
 - `src/sync.ts` — maps the server's id-keyed rows (clients, meetings,
   scheduled meetings, team) to the client-name-keyed shapes the rest of the
-  app already works with, so `derive.ts` needed almost no changes for Phase 2.
+  app already works with, so `derive.ts` needed almost no changes for Phase
+  2, plus `scopeSpeakerKey()`, which normalizes Deepgram/Claude's raw
+  per-recording speaker labels ("?0", "Speaker 0") into the meeting-scoped
+  unnamed-voice keys the rest of the app expects.
 - `src/capture.ts` — renderer-side mic + system-audio capture and recording;
   the resulting blob is uploaded via `api.ts` instead of processed locally.
 - `src/persistence.ts` — a local cache (auth token + last-synced data) via

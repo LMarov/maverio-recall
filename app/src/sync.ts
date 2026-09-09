@@ -8,6 +8,24 @@ export function shortDate(iso: string): string {
   return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 }
 
+/**
+ * Deepgram/Claude diarize speakers per-recording only ("?0", "?1", ... in
+ * transcript lines; "Speaker 0", "Speaker 1", ... in the analysis' action
+ * "who" field). Neither is a person the app otherwise knows about, so both
+ * get rewritten to the same meeting-scoped unnamed-voice key ("?<meetingId>:N")
+ * the rest of the app (speaker(), the namer modal, voiceNames) already
+ * expects — never a bare "?0" that could collide with an unrelated meeting's
+ * speaker 0, and never a raw "Speaker N" that isn't a recognized voice key at all.
+ */
+export function scopeSpeakerKey(meetingId: string, raw: string): string {
+  const bareUnnamed = /^\?(\d+)$/.exec(raw);
+  if (bareUnnamed) return '?' + meetingId + ':' + bareUnnamed[1];
+  const speakerLabel = /^Speaker (\d+)$/i.exec(raw);
+  if (speakerLabel) return '?' + meetingId + ':' + speakerLabel[1];
+  return raw;
+}
+
+
 export function mapClients(rows: ClientRow[]): { clientData: Record<string, ClientRecord>; nameToId: Record<string, string>; idToName: Record<string, string> } {
   const clientData: Record<string, ClientRecord> = {};
   const nameToId: Record<string, string> = {};
@@ -43,6 +61,9 @@ export function mapTeam(rows: TeamMemberRow[]): TeamMember[] {
 export function mapMeeting(row: MeetingRow, idToName: Record<string, string>): Meeting {
   const d = new Date(row.occurredAt);
   const mins = row.durationSeconds ? Math.max(1, Math.round(row.durationSeconds / 60)) : 0;
+  const lines = row.lines.map((l) => ({ ...l, k: scopeSpeakerKey(row.id, l.k) }));
+  const people = row.people.map((p) => scopeSpeakerKey(row.id, p));
+  const actions = row.actions.map((a) => ({ ...a, who: scopeSpeakerKey(row.id, a.who) }));
   return {
     id: row.id,
     title: row.title,
@@ -55,16 +76,16 @@ export function mapMeeting(row: MeetingRow, idToName: Record<string, string>): M
     dur: mins + ' min',
     dec: row.decisions.length,
     act: row.actions.length,
-    people: row.people,
+    people,
     unknown: row.unknownCount,
     summary: row.summary || (row.stage !== 'done' ? 'Processing…' : ''),
     decisions: row.decisions,
     objective: row.objective,
     objectiveCite: row.objectiveCite,
     gaps: row.gaps,
-    actions: row.actions,
+    actions,
     fields: row.fields,
-    lines: row.lines,
+    lines,
     stage: row.stage,
     date: row.occurredAt,
     published: row.published,
