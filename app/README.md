@@ -115,7 +115,7 @@ that exact pattern directly, across every screen, not just the current
 one. No server, no Electron, and no browser needed — these run against
 plain Node.
 
-## What's real vs. still mocked (Phase 7)
+## What's real vs. still mocked (Phase 10)
 
 **Real, shared across the team via the server:**
 - Sign-in (email + password), invite-a-colleague, forgot/reset password,
@@ -174,12 +174,16 @@ plain Node.
   launch/focus the app hasn't been, since that needs a real signed,
   installed build on an actual Mac — not available in this sandbox.
 
+- **Ask ranks meetings by real relevance** to the question — Postgres
+  full-text search over title/objective/summary/decisions/actions/gaps
+  (`../server/src/pipeline/retrieval.ts`), not just the 50 most recent —
+  falling back to recency for whatever's left when the question's wording
+  doesn't overlap the corpus. Ranks on shared vocabulary, not meaning, so
+  it's full-text search rather than genuine semantic/vector search — see
+  `../server/README.md` for that distinction.
+
 **Still mocked / not yet built:**
 - Simultaneous screen recording (removed from the UI as not implemented)
-- Ask search has no real ranking/retrieval — it hands the server's 50 most
-  recent meetings' summaries to Claude (or one full meeting when scoped).
-  Fine for a team's real-world volume today; will need actual retrieval
-  (full-text or vector search) once a team has hundreds of meetings.
 - Voiceprint enrollment rebuilds a person's profile from whichever meeting's
   audio they were most recently (re)named in — it doesn't average across
   every meeting they've ever been confirmed in.
