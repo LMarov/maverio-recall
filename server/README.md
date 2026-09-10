@@ -1,254 +1,239 @@
-# Maverio Recall — server
+# Maverio Recall
 
-The Phase 2 backend for Maverio Recall: a small Express + Postgres API and
-websocket server that the Electron app (`../app`) talks to. It's what turns
-Recall from a single-user local app into a real product a whole team signs
-into and shares.
+A macOS desktop app (Electron + React + TypeScript) implementing the
+`Maverio Recall` design from `../project/Maverio Recall.dc.html`.
 
-## What it does
-
-- **Auth** — email + password, JWT sessions, invite-only signup gated to
-  `@maverio.com`, password reset, rate-limited login/invite/reset endpoints
-  (`src/routes/auth.ts`, `src/routes/team.ts`, `src/util/rateLimit.ts`).
-- **Email** — invite and password-reset emails go through a small adapter
-  (`src/email/`) that defaults to logging to the console (no account
-  needed) and can send for real over SMTP with any provider. Both emails
-  include a clickable `maveriorecall://join/<code>` or
-  `maveriorecall://reset/<code>` deep link that opens the desktop app with
-  the code pre-filled, alongside the raw code as a fallback.
-- **Data** — clients, meetings (with decisions/actions/gaps/fields/
-  transcript lines), scheduled meetings, voice names, voiceprints, an audit
-  log — all in Postgres (`src/db/migrations/`).
-- **Audio + AI pipeline** — accepts an uploaded recording, stores it (S3 or
-  local disk), transcribes it with Deepgram, analyzes it with Claude, and
-  writes the result back onto the meeting row (`src/pipeline/`,
-  `src/routes/audio.ts`). API keys live only here — never on a client.
-- **Realtime** — a websocket (`src/realtime/hub.ts`) pushes every change
-  (new meeting, stage change, publish, a new client, a scheduled meeting,
-  a teammate joining) to every signed-in client instantly.
-- **Ask** — `POST /ask` (`src/routes/ask.ts`, `src/pipeline/ask.ts`) answers
-  a free-text question about the team's meetings. It hands Claude the
-  relevant meeting content (summary/objective/decisions/actions/gaps for
-  every meeting, or one meeting's full transcript when the question is
-  scoped to it) with the same "use only what's given" grounding as the
-  analysis pipeline, and returns an answer plus citations back to the
-  source meeting(s). Same API-key-stays-server-side rule as the rest of the
-  pipeline.
-- **Audit log** — `GET /audit` (`src/routes/audit.ts`, owners/admins only)
-  reads back sign-ins, invites, client edits, publishes, and audio-retention
-  deletions written by `src/util/audit.ts`.
-- **Audio retention** — `src/jobs/retention.ts` runs daily, deleting the raw
-  audio blob (not the transcript/analysis) for any meeting past
-  `AUDIO_RETENTION_DAYS`, and logs the deletion to the audit log.
-- **Cross-meeting voice recognition** — `src/pipeline/voiceprint.ts` +
-  `src/pipeline/audioDecode.ts`. Optional: only runs when
-  `PICOVOICE_ACCESS_KEY` is set. Naming a speaker (`PUT
-  /meetings/meta/voice-names/:key`) decodes that meeting's audio, slices out
-  that speaker's turns, and enrolls a real voiceprint (Picovoice Eagle,
-  on-device speaker embeddings — only the derived profile is stored, never
-  raw audio, so it isn't affected by the retention job). Every new
-  meeting's still-unnamed speakers are then checked against every enrolled
-  voiceprint (`identifySpeakers`), and a match above threshold is written to
-  that meeting's `speaker_suggestions` — surfaced to the client purely as a
-  suggestion; a human still has to confirm it via the namer. With no key
-  set, this whole layer is skipped and naming a speaker behaves exactly as
-  it did before Phase 5.
+This started as a faithful **front-end clone with mock data** of the Claude
+Design prototype (Phase 0), then grew real single-user audio capture,
+transcription and AI analysis (Phase 1), and is now a **real, shared,
+multi-user product (Phase 2)**: sign-in-gated, backed by the server in
+`../server`, with clients/meetings/scheduling/team all persisted centrally in
+Postgres and kept in sync live over a websocket. See "What's real vs. still
+mocked" below.
 
 ## Setup
 
 ```bash
 npm install
-cp .env.example .env      # fill in DATABASE_URL, JWT_SECRET, API keys — see below
-npm run migrate           # creates the schema in Postgres
-npm run seed              # 5 dev accounts (password: recall-dev-1) + 3 clients
-npm run dev                # ts-node/tsx watch mode on :8787 (see package.json)
+cp .env.example .env      # then fill in your API keys + VITE_API_URL, see below
+npm run dev:electron      # Vite + Electron together, hot reload in the app window
 ```
 
-You need a Postgres instance reachable at `DATABASE_URL`. Locally that can
-be a system Postgres install or `docker run -p 5432:5432 postgres` — either
-way, create the database first (`createdb recall` or equivalent) before
-running the migration.
+You also need the server running (see `../server/README.md`) — the desktop
+app is a thin client now; it signs in against that server and has no
+meaningful local-only mode of its own.
 
-### Environment variables (`.env`)
+### API keys / config (`.env`)
 
-| Key | Used for |
+| Key | Used for | Get one at |
+|---|---|---|
+| `VITE_API_URL` | Where the desktop app looks for the Maverio Recall server | `../server`, defaults to `http://localhost:8787` |
+| `DEEPGRAM_API_KEY` | Transcription + speaker diarization (server-side only, see below) | https://console.deepgram.com |
+| `ANTHROPIC_API_KEY` | Summary / decisions / actions / gaps analysis (server-side only, see below) | https://console.anthropic.com |
+
+`.env` lives next to `package.json` and is gitignored. `VITE_API_URL` is
+read at **build time** by Vite (must be prefixed `VITE_`) since it's needed
+in the renderer to know where to sign in. `DEEPGRAM_API_KEY` /
+`ANTHROPIC_API_KEY` are no longer used by this app directly — the AI
+pipeline moved server-side in Phase 2 (`../server/src/pipeline/`) so API
+keys never need to reach a desktop machine at all. They're kept here only
+because the Electron main process still reads them as a fallback for the
+(now unused) local-only pipeline code in `electron/ai.cjs` — set them on the
+**server's** `.env` instead.
+
+### macOS permissions
+
+The first time you record, macOS will prompt for:
+- **Microphone** — required.
+- **Screen & System Audio Recording** — needed to capture the other side of
+  the call (system audio), not just your mic. If you decline, or your macOS
+  version doesn't support it, Recall falls back to **mic-only** and tells you
+  so on the recording pill and in that meeting's fields.
+
+System-audio capture is the single most fragile part of this app — it
+depends on Electron/Chromium's desktop-audio-loopback support and your macOS
+version, and can't be fully verified outside a real Mac with real hardware.
+If it's unreliable on your machine, mic-only recording still works.
+
+## Build
+
+```bash
+npm run build   # type-check + Vite production build -> dist/
+npm run dist    # build + package a macOS app with electron-builder
+```
+
+Electron and electron-builder are kept on their latest stable majors
+(currently Electron 44, electron-builder 26) rather than pinned indefinitely
+— `npm audit` flagged real high/critical CVEs in the versions this project
+started on (Phase 0), unaddressed until this was deliberately revisited.
+Bumping Electron is the highest-regression-risk dependency update this app
+has, since it's the runtime everything else (capture, IPC, the packaged
+app) runs on top of — re-run the full manual capture/permissions smoke test
+on a real Mac after any future Electron major bump, the same way this one
+was verified live (screen-by-screen navigation, IPC round-trips, a
+test-packaged `.app` bundle) before being adopted.
+
+### Signing & notarization
+
+`npm run dist` produces an unsigned `.dmg` by default — fine for your own
+testing, but macOS Gatekeeper will block it on anyone else's machine unless
+it's signed with a real Apple Developer ID and notarized. This only works
+running on an actual Mac (code signing/notarization shell out to `codesign`
+and `xcrun notarytool`) with a paid Apple Developer Program membership —
+neither is available in this sandbox, so this has been configured but never
+actually run.
+
+`electron-builder` (see `build.mac` in `package.json`,
+`build/entitlements.mac.plist`) already has hardened runtime + the
+entitlements Electron needs under it, and the microphone usage description
+Recall's mic capture requires. It signs and notarizes automatically once
+these environment variables are set before `npm run dist`:
+
+| Env var | For |
 |---|---|
-| `DATABASE_URL` | Postgres connection string |
-| `JWT_SECRET` | Signs session tokens — use a long random value in production |
-| `ALLOWED_EMAIL_DOMAIN` | Domain invites are restricted to (default `maverio.com`) |
-| `STORAGE_DRIVER` | `s3` (recommended) or `local` (dev-only, writes to `LOCAL_STORAGE_DIR`) |
-| `S3_*` | S3-compatible object storage config (AWS S3, MinIO, R2, ...) — only used when `STORAGE_DRIVER=s3` |
-| `DEEPGRAM_API_KEY` | Transcription + speaker diarization — https://console.deepgram.com |
-| `ANTHROPIC_API_KEY` | Meeting analysis — https://console.anthropic.com |
-| `PORT` | Defaults to `8787` |
-| `EMAIL_DRIVER` | `console` (default, dev-only — logs the email instead of sending it) or `smtp` |
-| `EMAIL_FROM` | The "from" address on sent emails |
-| `SMTP_HOST` / `SMTP_PORT` / `SMTP_SECURE` / `SMTP_USER` / `SMTP_PASS` | Only used when `EMAIL_DRIVER=smtp` — works with any SMTP provider (Gmail, SES, Postmark, Mailgun, your own mail server, ...); no specific vendor required |
-| `APP_URL` | Included in emailed links — the app's own URL (default `http://localhost:5173`) |
-| `AUDIO_RETENTION_DAYS` | Days raw meeting audio is kept before the retention job deletes it (default `30`) — transcripts/analysis are unaffected |
-| `PICOVOICE_ACCESS_KEY` | Optional — enables real cross-meeting voice recognition (https://console.picovoice.ai/). Leave blank to skip it entirely |
-| `JWT_SECRET_PREVIOUS` | Optional — set to the old `JWT_SECRET` while rotating it, so existing sessions keep verifying until they expire |
-| `CORS_ORIGIN` | Comma-separated allowed origins, or `*` (default) |
-| `TRUST_PROXY` | Set to `1` when running behind a single reverse proxy/load balancer, so rate limiting and `req.ip` see the real client IP |
-| `NODE_ENV` | `production` switches request logging to the fuller `combined` format; anything else uses the terser `dev` format |
+| `CSC_LINK` / `CSC_KEY_PASSWORD` | Path (or base64) to your Developer ID Application `.p12` certificate + its password — code signing |
+| `APPLE_ID` / `APPLE_APP_SPECIFIC_PASSWORD` / `APPLE_TEAM_ID` | Notarization via an app-specific password (simplest) |
+| `APPLE_API_KEY` / `APPLE_API_KEY_ID` / `APPLE_API_ISSUER` | Notarization via an App Store Connect API key (alternative to the above) |
 
-Invite and password-reset emails go through this same adapter
-(`src/email/`). Leave `EMAIL_DRIVER=console` for local dev — the email
-content (including the invite/reset code) is printed to the server's
-console instead of sent, so nothing beyond running the server locally is
-needed to test either flow. Set `EMAIL_DRIVER=smtp` with real SMTP
-credentials to actually deliver mail.
+Leave all of these unset for a local unsigned build — `npm run dist` still
+works, it just isn't distributable to other machines.
 
-`STORAGE_DRIVER=local` is meant for local development only — it writes
-recordings to disk under `LOCAL_STORAGE_DIR` and serves them back over
-plain HTTP with no access control, which is fine on a laptop but not how
-you'd run this for a real team. Point `STORAGE_DRIVER=s3` at a real bucket
-(AWS S3, or a self-hosted MinIO) for anything beyond local testing.
-
-## Running the pieces together locally
+### Testing
 
 ```bash
-# 1. Postgres running and reachable at DATABASE_URL
-# 2. In server/:
-npm run migrate && npm run seed && npm run dev
-# 3. In app/: point VITE_API_URL at this server (default http://localhost:8787), then
-npm run build && npm run dev:electron
-# 4. Sign in as lana@maverio.com / recall-dev-1 (or any of the 5 seeded accounts)
+npm test   # vitest run
 ```
 
-## Testing
+Unit tests for the pure, view-model-adjacent logic — `data.ts`'s attendee
+resolvers, `sync.ts`'s server-row mappers, and `derive.ts`'s `buildView`
+itself against realistic `AppState` fixtures. `derive.ts` computes the
+*entire* view-model unconditionally on every render regardless of which
+screen is active, which is exactly why an unsafe lookup on one screen's
+data has twice now crashed every other screen too (a real teammate with no
+fixed-demo `k`; a real per-meeting speaker key) — `derive.test.ts` targets
+that exact pattern directly, across every screen, not just the current
+one. No server, no Electron, and no browser needed — these run against
+plain Node.
 
-```bash
-npm test
-```
+## What's real vs. still mocked (Phase 10)
 
-Runs `tsc -p tsconfig.test.json` (typechecks the test files too, since
-they're excluded from the production build) and then Vitest:
+**Real, shared across the team via the server:**
+- Sign-in (email + password), invite-a-colleague, forgot/reset password,
+  domain-gated to `@maverio.com` — `src/components/screens/Auth.tsx`,
+  `src/api.ts`. Invite and reset emails are sent for real once the server
+  has `EMAIL_DRIVER=smtp` configured (see `../server/README.md`).
+- Clients (create/edit/archive/notes/contacts), scheduled meetings, meeting
+  publish/unpublish, gap answers, field edits, title edits, voice names —
+  all persisted in the server's Postgres database and live-synced to every
+  signed-in teammate over the websocket (`src/realtime.ts`)
+- Audio capture (mic + best-effort system audio) via `src/capture.ts`,
+  uploaded to the server, which runs transcription (Deepgram) + AI analysis
+  (Claude) and pushes the result back over the websocket — no API keys or
+  AI calls happen on the desktop machine anymore
+- **The Ask rail** — `ask()` in `src/useApp.ts` calls the server's `/ask`
+  endpoint, which grounds Claude's answer in the team's actual meetings
+  (summaries, decisions, actions, gaps, and — when the question is scoped to
+  one meeting — the full transcript) and returns real citations back to the
+  source meeting. No more canned answer bank once signed in.
+- A brand-new team's workspace starts genuinely empty (no seed meetings) —
+  the Timeline/Knowledge base/Ask rail all handle the zero-data state gracefully
+- A pending invite (no name yet — the invitee hasn't accepted) renders with
+  a readable placeholder name derived from their email (`nameFromEmail` in
+  `src/data.ts`) everywhere a team member's name is shown, instead of
+  assuming every team member already has one
+- **Prep's "Voices in the room" attendee chips** are the real team roster and
+  the current client's real contacts (`attendeeFromTeamMember`/
+  `attendeeFromContact` in `src/data.ts`), each with a stable, deterministic
+  avatar color (`colorForKey`) — not the fixed 8-person mock dictionary
+- **The audit log** (Capture & policy screen, owners/admins only) reads real
+  sign-ins, invites, client edits, publishes, and audio-retention deletions
+  from the server's `/audit` endpoint
+- **Cross-meeting voice recognition** — when the server has a
+  `PICOVOICE_ACCESS_KEY` configured, naming a speaker enrolls a real
+  voiceprint (Picovoice Eagle, on-device speaker embeddings — no raw audio
+  stored, just the derived profile), and every new meeting's still-unnamed
+  speakers are checked against it. A match only ever surfaces as a
+  suggestion — a prefilled name + confidence % on the Voices screen's
+  pending-voice card and in the namer — a human still has to confirm it.
+  Entirely optional: with no key set, naming a speaker works exactly as
+  before, just without any cross-meeting matching. See `../server/README.md`
+  for the setup and honest limits of this (it needs a real Picovoice
+  AccessKey to do anything, which this sandbox doesn't have).
 
-- **Unit tests** need nothing beyond the code itself —
-  `src/util/rateLimit.test.ts`, `src/auth/jwt.test.ts`,
-  `src/pipeline/voiceprint.test.ts`, `src/pipeline/transcribe.test.ts`.
-- **Integration tests** (`src/routes/*.test.ts`) exercise the real Express
-  app end to end with `supertest`, against a real Postgres database — not
-  mocks. `src/testSetup.ts` derives a `<database>_test` sibling database
-  from `DATABASE_URL`, creates it if missing, and migrates it before the
-  suite runs; `src/testDb.ts` truncates every table between tests so they
-  stay isolated from each other and never touch your real dev data.
+- **Invite and password-reset emails are clickable deep links.** Clicking
+  `maveriorecall://join/<code>` or `maveriorecall://reset/<code>` (see
+  `electron/main.cjs`) launches the app straight into the accept-invite or
+  reset-password screen with the code already filled in — the raw code is
+  still included underneath as a fallback for anyone whose mail client
+  strips the link or who's copying it to a different machine. A real
+  `recall.maverio.com/join/...` web link would need an actual hosted domain;
+  this achieves the same one-click outcome without one, since macOS hands a
+  registered custom URL scheme straight to the app. The link-parsing logic
+  and the packaged app's `Info.plist` registration were both verified
+  directly; actually clicking a `maveriorecall://` link and watching macOS
+  launch/focus the app hasn't been, since that needs a real signed,
+  installed build on an actual Mac — not available in this sandbox.
 
-The role in `DATABASE_URL` needs `CREATEDB` privilege the first time (so
-`testSetup.ts` can create the sibling test database itself) —
-`ALTER ROLE recall CREATEDB;` as a superuser, or just pre-create
-`<database>_test` yourself and skip that requirement. CI's Postgres service
-container gets this automatically (its default role is a superuser).
+- **Ask ranks meetings by real relevance** to the question — Postgres
+  full-text search over title/objective/summary/decisions/actions/gaps
+  (`../server/src/pipeline/retrieval.ts`), not just the 50 most recent —
+  falling back to recency for whatever's left when the question's wording
+  doesn't overlap the corpus. Ranks on shared vocabulary, not meaning, so
+  it's full-text search rather than genuine semantic/vector search — see
+  `../server/README.md` for that distinction.
 
-## Production deployment
-
-```bash
-cp .env.example .env   # fill in real secrets — see below
-docker compose up --build -d
-docker compose exec server npm run migrate
-```
-
-`docker-compose.yml` runs a production-like stack — Postgres, MinIO
-(S3-compatible storage), and the server itself, each in its own container —
-for a self-hosted deploy or local testing of the packaged image. The
-`Dockerfile` is a multi-stage build producing a small runtime image
-(`node dist/index.js`, matching `npm start`) with a `/health`-backed
-`HEALTHCHECK` your orchestrator can also point a load balancer health check
-at. It's Debian-based rather than Alpine — `@picovoice/eagle-node` ships a
-glibc-linked native binary that won't load under musl.
-
-For a real deploy (not just local docker-compose), a few things change from
-the dev defaults:
-
-- **Storage**: point `STORAGE_DRIVER=s3` at a real bucket (AWS S3, or a
-  self-hosted MinIO you actually run in production) — `STORAGE_DRIVER=local`
-  is dev-only, see above.
-- **Email**: set `EMAIL_DRIVER=smtp` with real credentials so invite/reset
-  emails actually deliver, instead of only logging to the console.
-- **Secrets**: use a long random `JWT_SECRET`. To rotate it without logging
-  everyone out, set the new value as `JWT_SECRET` and the old one as
-  `JWT_SECRET_PREVIOUS` for 30 days (session lifetime), then drop the
-  latter.
-- **Reverse proxy**: put this behind a TLS-terminating reverse proxy (Caddy
-  is the least-setup option for automatic HTTPS; nginx + certbot works too)
-  rather than exposing the server directly. Once you do, set
-  `TRUST_PROXY=1` so rate limiting and `req.ip` see the real client IP
-  instead of the proxy's, and set `CORS_ORIGIN` if this API ever gains a
-  web (browser-based) client — the desktop app itself doesn't have a fixed
-  origin the way a website would, so `*` (the default) is fine for the
-  architecture as it stands today.
-- **Migrations**: run `npm run migrate` as a one-off command after each
-  deploy (`docker compose exec server npm run migrate`, or the equivalent
-  one-off task on your platform) — the server doesn't migrate itself on
-  boot, so a botched migration can't silently take down a running instance.
-- **Scaling**: `rateLimit.ts`'s in-memory counters and the websocket
-  connection registry (`realtime/hub.ts`) are both per-process — this all
-  assumes a single server instance. Running more than one behind a load
-  balancer needs a shared store (e.g. Redis) for both.
-
-None of this — the Dockerfile, docker-compose stack, or the reverse-proxy
-setup — has been run end to end in this sandbox (no Docker daemon
-available here to actually `docker build`/`docker run`); it's been reviewed
-carefully but not exercised live the way the rest of this app's features
-have been.
+**Still mocked / not yet built:**
+- Simultaneous screen recording (removed from the UI as not implemented)
+- Voiceprint enrollment rebuilds a person's profile from whichever meeting's
+  audio they were most recently (re)named in — it doesn't average across
+  every meeting they've ever been confirmed in.
 
 ## Structure
 
-- `Dockerfile`, `docker-compose.yml`, `.dockerignore` — the production
-  deploy artifacts, see "Production deployment" above.
-- `src/index.ts` — http/websocket server bootstrap (imports the Express app
-  from `src/app.ts` and starts listening); `src/app.ts` builds the Express
-  app itself with no listening socket, so tests can import it directly.
-- `src/env.ts` — typed env var access.
-- `src/testSetup.ts`, `src/testDb.ts`, `**/*.test.ts` — the test suite, see
-  "Testing" above. Excluded from the production build
-  (`tsconfig.json`'s `exclude`).
-- `src/db/` — Postgres pool, a tiny SQL-file migration runner, the seed script.
-- `src/auth/` — password hashing, JWT sign/verify, the `requireAuth` middleware.
-- `src/routes/` — one file per resource (`auth`, `team`, `clients`,
-  `meetings`, `scheduled`, `audio`, `ask`).
-- `src/storage/` — the object-storage abstraction (`s3.ts` / `local.ts`)
-  behind a single `StorageAdapter` interface.
-- `src/pipeline/` — `transcribe.ts` (Deepgram), `analyze.ts` (Claude),
-  `process.ts` (orchestrates the two after an upload and broadcasts the
-  result, then runs voiceprint identification), `ask.ts` (answers a question
-  grounded in the team's meetings), `voiceprint.ts` (Picovoice Eagle
-  enroll/identify), `audioDecode.ts` (ffmpeg-static: compressed upload ->
-  16kHz mono PCM for Eagle).
-- `src/jobs/retention.ts` — the daily audio-retention job.
-- `src/realtime/hub.ts` — the websocket connection registry + `broadcast()`.
-- `src/email/` — the email abstraction (`console.ts` / `smtp.ts`) behind a
-  single `EmailAdapter` interface, same pattern as `src/storage/`.
-- `src/util/` — small shared helpers (async route wrapper, audit log writer,
-  `rateLimit.ts` — an in-memory fixed-window limiter on the auth/invite
-  endpoints).
+- `build/entitlements.mac.plist` — hardened-runtime entitlements for
+  signing/notarization, see "Signing & notarization" above.
+- `src/*.test.ts` — the test suite, see "Testing" above.
+- `electron/main.cjs` — window + local IPC handlers (screen-source picker,
+  mic permission, saving a recording to a temp file), plus the
+  `maveriorecall://` custom-protocol registration and deep-link parsing
+  (forwarded to the renderer over the `deep-link` IPC channel, see
+  `electron/preload.cjs`'s `onDeepLink`). The old local store/transcribe/
+  analyze IPC handlers (`electron/store.cjs`, `electron/ai.cjs`) are unused
+  now that the server does all of that, and are kept only as a reference
+  for the Phase 1 local-only pipeline.
+- `src/api.ts` — REST client for the server (`../server`): auth, team,
+  clients, meetings, scheduled meetings, audio upload, ask. The only place a
+  network request is made.
+- `src/realtime.ts` — websocket client; subscribes to live events
+  (`meeting.*`, `client.updated`, `scheduled.*`, `team.*`) from the server.
+- `src/sync.ts` — maps the server's id-keyed rows (clients, meetings,
+  scheduled meetings, team) to the client-name-keyed shapes the rest of the
+  app already works with, so `derive.ts` needed almost no changes for Phase
+  2, plus `scopeSpeakerKey()`, which normalizes Deepgram/Claude's raw
+  per-recording speaker labels ("?0", "Speaker 0") into the meeting-scoped
+  unnamed-voice keys the rest of the app expects.
+- `src/capture.ts` — renderer-side mic + system-audio capture and recording;
+  the resulting blob is uploaded via `api.ts` instead of processed locally.
+- `src/persistence.ts` — a local cache (auth token + last-synced data) via
+  IPC (or `localStorage` in a plain browser), so the app paints instantly on
+  launch before the network fetch + websocket reconcile it with the server.
+- `src/data.ts` — the original mock data model (people, seed meetings, the
+  canned Q&A answer bank, practices) — still used as an offline-safe default
+  before login, and for cosmetic constants (practice colors, audit action
+  labels) that didn't need to change. Also home to the real-attendee
+  resolvers (`attendeeFromTeamMember`, `attendeeFromContact`,
+  `resolveAttendeeKey`, `colorForKey`) that unify the fixed demo roster with
+  real team members and client contacts wherever a speaker/attendee needs a
+  name and color.
+- `src/initialState.ts` — the app's initial state shape.
+- `src/useApp.ts` — state + the imperative logic: auth (login/accept-invite/
+  logout), the real recording lifecycle (capture → upload → the server
+  transcribes/analyzes and pushes updates back), markdown export, search, ask.
+- `src/derive.ts` — builds the view-model consumed by every screen
+  component (labels, colors, computed booleans, event handlers) — this is
+  the direct port of the prototype's `renderVals()`, now sourcing
+  clients/meetings/team/scheduled meetings from server-synced state instead
+  of the static mock constants.
+- `src/components/` — presentational React components, one per screen/overlay.
 
-## What's not built yet
-
-- Invite emails still hand back the raw join token in the API response too
-  (Team & seats shows it after sending one) as a fallback for when
-  `EMAIL_DRIVER=console` or delivery fails — by design, not a gap.
-- The `maveriorecall://` deep links in invite/reset emails have had their
-  link-parsing logic and packaged-app protocol registration verified
-  directly, but not an actual click-to-launch on a real Mac (needs a
-  signed, installed build — see `../app/README.md`).
-- `rateLimit.ts`'s in-memory counters are per-process — fine for a single
-  server instance (this app's whole deployment model today), but would need
-  a shared store (e.g. Redis) if this ever ran as multiple instances behind
-  a load balancer.
-- `/ask` has no real retrieval — it hands Claude the 50 most recent
-  meetings' summaries (or one full meeting when scoped) rather than
-  ranking/searching for the most relevant ones. Fine at the volume a team
-  produces today; will need real full-text or vector search once there are
-  hundreds of meetings.
-- Voiceprint enrollment isn't cumulative — naming a speaker rebuilds their
-  profile from that one meeting's audio, replacing whatever was there
-  before, rather than averaging across every meeting they've ever been
-  confirmed in.
-- Voiceprint matching genuinely requires a real `PICOVOICE_ACCESS_KEY` and
-  cannot be end-to-end verified in a sandbox without one (or without real
-  Deepgram network access to produce a transcript in the first place) — the
-  decode/slice/enroll/identify code paths are each verified in isolation,
-  but no one has watched a real "record → later recording auto-suggests the
-  same person" round trip happen end to end yet.
+See `../server/README.md` for the backend.
