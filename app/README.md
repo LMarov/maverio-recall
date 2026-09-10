@@ -1,10 +1,1 @@
-Electron and electron-builder are kept on their latest stable majors
-(currently Electron 44, electron-builder 26) rather than pinned indefinitely
-— `npm audit` flagged real high/critical CVEs in the versions this project
-started on (Phase 0), unaddressed until this was deliberately revisited.
-Bumping Electron is the highest-regression-risk dependency update this app
-has, since it's the runtime everything else (capture, IPC, the packaged
-app) runs on top of — re-run the full manual capture/permissions smoke test
-on a real Mac after any future Electron major bump, the same way this one
-was verified live (screen-by-screen navigation, IPC round-trips, a
-test-packaged `.app` bundle) before being adopted.
+Electron and electron-builder are kept on their latest stable majors (currently Electron 44, electron-builder 26) rather than pinned indefinitely — npm audit flagged real high/critical CVEs in the versions this project started on (Phase 0), unaddressed until this was deliberately revisited. Bumping Electron is the highest-regression-risk dependency update this app has, since it's the runtime everything else (capture, IPC, the packaged app) runs on top of — re-run the full manual capture/permissions smoke test on a real Mac after any future Electron major bump, the same way this one was verified live (screen-by-screen navigation, IPC round-trips, a test-packaged .app bundle) before being adopted.
