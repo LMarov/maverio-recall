@@ -3,12 +3,11 @@ import { z } from 'zod';
 import { requireAuth } from '../auth/middleware';
 import { pool } from '../db/pool';
 import { answerQuestion, type AskDocument } from '../pipeline/ask';
+import { retrieveMeetings } from '../pipeline/retrieval';
 import { asyncHandler } from '../util/asyncHandler';
 
 export const askRouter = Router();
 askRouter.use(requireAuth);
-
-const MAX_MEETINGS = 50;
 
 const askSchema = z.object({ question: z.string().min(1), meetingId: z.string().uuid().optional() });
 
@@ -38,8 +37,7 @@ askRouter.post(
       const { rows: r } = await pool.query('select * from meetings where id = $1', [body.meetingId]);
       rows = r;
     } else {
-      const { rows: r } = await pool.query('select * from meetings order by occurred_at desc limit $1', [MAX_MEETINGS]);
-      rows = r;
+      rows = await retrieveMeetings(body.question);
     }
 
     if (rows.length === 0) {
