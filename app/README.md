@@ -1,25 +1,10 @@
-# CODING AGENTS: READ THIS FIRST
-
-This is a **handoff bundle** from Claude Design (claude.ai/design).
-
-A user mocked up designs in HTML/CSS/JS using an AI design tool, then exported this bundle so a coding agent can implement the designs for real.
-
-## What you should do — IMPORTANT
-
-**Read the chat transcripts first.** There are 2 chat transcript(s) in `chats/`. The transcripts show the full back-and-forth between the user and the design assistant — they tell you **what the user actually wants** and **where they landed** after iterating. Don't skip them. The final HTML files are the output, but the chat is where the intent lives.
-
-**Read `project/Maverio Recall.dc.html` in full.** The user had this file open when they triggered the handoff, so it's almost certainly the primary design they want built. Read it top to bottom — don't skim. Then **follow its imports**: open every file it pulls in (shared components, CSS, scripts) so you understand how the pieces fit together before you start implementing.
-
-**If anything is ambiguous, ask the user to confirm before you start implementing.** It's much cheaper to clarify scope up front than to build the wrong thing.
-
-## About the design files
-
-The design medium is **HTML/CSS/JS** — these are prototypes, not production code. Your job is to **recreate them pixel-perfectly** in whatever technology makes sense for the target codebase (React, Vue, native, whatever fits). Match the visual output; don't copy the prototype's internal structure unless it happens to fit.
-
-**Don't render these files in a browser or take screenshots unless the user asks you to.** Everything you need — dimensions, colors, layout rules — is spelled out in the source. Read the HTML and CSS directly; a screenshot won't tell you anything they don't.
-
-## Bundle contents
-
-- `README.md` — this file
-- `chats/` — conversation transcripts (read these!)
-- `project/` — the `Meeting Recording & Voice Analysis App` project files (HTML prototypes, assets, components)
+Electron and electron-builder are kept on their latest stable majors
+(currently Electron 44, electron-builder 26) rather than pinned indefinitely
+— `npm audit` flagged real high/critical CVEs in the versions this project
+started on (Phase 0), unaddressed until this was deliberately revisited.
+Bumping Electron is the highest-regression-risk dependency update this app
+has, since it's the runtime everything else (capture, IPC, the packaged
+app) runs on top of — re-run the full manual capture/permissions smoke test
+on a real Mac after any future Electron major bump, the same way this one
+was verified live (screen-by-screen navigation, IPC round-trips, a
+test-packaged `.app` bundle) before being adopted.
