@@ -1,5 +1,3 @@
-$ cat /home/claude/repo/app/README.md
-
 # Maverio Recall
 
 A macOS desktop app (Electron + React + TypeScript) implementing the
