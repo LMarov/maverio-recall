@@ -5,7 +5,7 @@ import { hashPassword } from './auth/password';
 export async function resetDb() {
   await pool.query(`
     truncate table
-      audit_log, field_edits, gap_answers, client_notes, client_contacts,
+      error_log, audit_log, field_edits, gap_answers, client_notes, client_contacts,
       scheduled_meetings, meetings, clients, voice_names, voiceprints,
       password_resets, invites, users
     restart identity cascade

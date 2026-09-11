@@ -57,6 +57,9 @@ export const env = {
   /** How long raw meeting audio is kept before the retention job deletes it (transcript/analysis are unaffected). */
   audioRetentionDays: Number(process.env.AUDIO_RETENTION_DAYS || 30),
 
+  /** When set, GET /metrics requires `Authorization: Bearer <this>`. Unset (default) leaves it open — fine for local dev, set this before exposing the server publicly. */
+  metricsToken: process.env.METRICS_TOKEN || '',
+
   /**
    * Picovoice Eagle AccessKey — enables real cross-meeting voice recognition
    * (https://console.picovoice.ai/). Entirely optional: when unset, naming a
